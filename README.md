@@ -1,2 +1,2 @@
-# brick-breaker-game
-This is a JAVA based implementation of a Brick Breaker game. 
+# Brick breaker game
+This is a JAVA based implementation of the so called Brick Breaker game. 
