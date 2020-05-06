@@ -3,18 +3,17 @@ import javax.swing.*;
 
 public class GUI extends JFrame
 {
-    public static final int WIDTH   = 320;
-    public static final int HEIGHT  = WIDTH / 12 * 9;
-    public static final int SCALE   = 2;
+    public static final int WIDTH   = 640;
+    public static final int HEIGHT  = 480;
 
     public final String TITLE       = "Brick Breaker Game";
 
     public GUI()
     {
         this.setTitle(TITLE);
-        this.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
-        this.setMaximumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
-        this.setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
+        this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        this.setMaximumSize(new Dimension(WIDTH, HEIGHT));
+        this.setMinimumSize(new Dimension(WIDTH, HEIGHT));
 
         Menus menu = new Menus();
         this.add(menu);
