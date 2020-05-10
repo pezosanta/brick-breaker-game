@@ -1,100 +1,100 @@
-import com.sun.tools.javac.Main;
-
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Font;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseListener;
 
-public class mainMenu
+public class mainMenu extends Menu implements MouseMotionListener, MouseListener
 {
-    public static enum BUTTONSTATE {SP, MP, SET, HELP, QUIT, OTHER};
-    public static enum CLICKEDSTATE {CLICKED, OTHER};
+    private enum BUTTONSTATE {SINGLEPLAYER, MULTIPLAYER, SETTINGS, HELP, QUIT, OTHER};
 
-    public static BUTTONSTATE buttonState       = BUTTONSTATE.OTHER;
-    public static CLICKEDSTATE clickedState     = CLICKEDSTATE.OTHER;
+    private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
+    private BUTTONSTATE buttonState                 = BUTTONSTATE.OTHER;
+    private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]
+            { BUTTONSTATE.SINGLEPLAYER, BUTTONSTATE.MULTIPLAYER, BUTTONSTATE.SETTINGS, BUTTONSTATE.HELP, BUTTONSTATE.QUIT, BUTTONSTATE.OTHER };
 
-    public static final int rectangleX          = GUI.WIDTH / 4;
-    public static final int[] rectangleYArray   = new int[]{ 120, 175, 230, 285, 340 };
-    public static final int rectangleWidth      = 300;
-    public static final int rectangleHeight     = 50;
+    private final int[] rectangleYArray             = new int[]{ 120, 175, 230, 285, 340 };
 
-    private final Rectangle singlePlayerButton  = new Rectangle(rectangleX, rectangleYArray[0], rectangleWidth, rectangleHeight);
-    private final Rectangle multiplayerButton   = new Rectangle(rectangleX, rectangleYArray[1], rectangleWidth, rectangleHeight);
-    private final Rectangle settingsButton      = new Rectangle(rectangleX, rectangleYArray[2], rectangleWidth, rectangleHeight);
-    private final Rectangle helpButton          = new Rectangle(rectangleX, rectangleYArray[3], rectangleWidth, rectangleHeight);
-    private final Rectangle quitButton          = new Rectangle(rectangleX, rectangleYArray[4], rectangleWidth, rectangleHeight);
+    private final Rectangle singlePlayerButton      = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle multiplayerButton       = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle settingsButton          = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle helpButton              = new Rectangle(super.rectangleX, rectangleYArray[3], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle quitButton              = new Rectangle(super.rectangleX, rectangleYArray[4], super.rectangleWidth, super.rectangleHeight);
 
+    private menuHandler menuHandlerObject;
 
+    public mainMenu(menuHandler mh)
+    {
+        menuHandlerObject = mh;
+        menuHandlerObject.addMouseListener(this);
+        menuHandlerObject.addMouseMotionListener(this);
+    }
+
+    @Override
     public void render(Graphics g)
     {
+        super.render(g);
+
         Graphics2D g2d = (Graphics2D) g;
 
-        g2d.setColor(Menus.inactiveColor);
+        g2d.setColor(super.inactiveColor);
         g2d.fill(singlePlayerButton);
         g2d.fill(multiplayerButton);
         g2d.fill(settingsButton);
         g2d.fill(helpButton);
         g2d.fill(quitButton);
 
-        if (buttonState == BUTTONSTATE.SP)
+        switch(buttonState)
         {
-            g2d.setColor(Menus.activeColor);
+            case SINGLEPLAYER:
+                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
+                else { g2d.setColor(super.activeColor); }
 
-            if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(Menus.clickedColor); }
+                g2d.fill(singlePlayerButton);
+                break;
 
-            g2d.fill(singlePlayerButton);
-        }
-        else if (buttonState == BUTTONSTATE.MP)
-        {
-            g2d.setColor(Menus.activeColor);
+            case MULTIPLAYER:
+                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
+                else { g2d.setColor(super.activeColor); }
 
-            if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(Menus.clickedColor); }
+                g2d.fill(multiplayerButton);
+                break;
 
-            g2d.fill(multiplayerButton);
-        }
-        else if (buttonState == BUTTONSTATE.SET)
-        {
-            g2d.setColor(Menus.activeColor);
+            case SETTINGS:
+                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
+                else { g2d.setColor(super.activeColor); }
 
-            if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(Menus.clickedColor); }
+                g2d.fill(settingsButton);
+                break;
 
-            g2d.fill(settingsButton);
-        }
-        else if (buttonState == BUTTONSTATE.HELP)
-        {
-            g2d.setColor(Menus.activeColor);
+            case HELP:
+                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
+                else { g2d.setColor(super.activeColor); }
 
-            if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(Menus.clickedColor); }
+                g2d.fill(helpButton);
+                break;
 
-            g2d.fill(helpButton);
-        }
-        else if (buttonState == BUTTONSTATE.QUIT)
-        {
-            g2d.setColor(Menus.activeColor);
+            case QUIT:
+                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
+                else { g2d.setColor(super.activeColor); }
 
-            if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(Menus.clickedColor); }
+                g2d.fill(quitButton);
+                break;
 
-            g2d.fill(quitButton);
-        }
-        else if (buttonState == BUTTONSTATE.OTHER)
-        {
-            g2d.setColor(Menus.inactiveColor);
-            g2d.fill(singlePlayerButton);
-            g2d.fill(multiplayerButton);
-            g2d.fill(settingsButton);
-            g2d.fill(helpButton);
-            g2d.fill(quitButton);
+            default:
+                g2d.setColor(super.inactiveColor);
+                g2d.fill(singlePlayerButton);
+                g2d.fill(multiplayerButton);
+                g2d.fill(settingsButton);
+                g2d.fill(helpButton);
+                g2d.fill(quitButton);
         }
 
-        Font fnt0 = new Font("arial", Font.BOLD, Menus.sizeTitle);
-        g.setFont(fnt0);
-        g.setColor(Color.black);
-        g.drawString("BRICK BREAKER GAME", Menus.xTitle, Menus.yTitle);
-
-        Font fnt1 = new Font("arial", Font.BOLD, 30);
+        Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
-        g.setColor(Color.white);
+        g.setColor(super.fontColor);
         g.drawString("Single player", singlePlayerButton.x + 54, singlePlayerButton.y + 35);
         g.drawString("Multiplayer", multiplayerButton.x + 70, multiplayerButton.y + 35);
         g.drawString("Settings", settingsButton.x + 90, settingsButton.y + 35);
@@ -102,5 +102,98 @@ public class mainMenu
         g.drawString("Quit", quitButton.x + 118, quitButton.y + 35);
 
         clickedState = CLICKEDSTATE.OTHER;
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e)
+    {
+        if ((super.rectangleX + super.rectangleWidth) >= e.getX() && e.getX() >= super.rectangleX)
+        {
+            buttonState = buttonStateArray[super.mouseMovedHelper(rectangleYArray, e.getY())];
+        }
+        else
+        {
+            buttonState = BUTTONSTATE.OTHER;
+        }
+        menuHandlerObject.repaint();
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e)
+    {
+        if ((super.rectangleX + super.rectangleWidth) >= e.getX() && e.getX() >= super.rectangleX)
+        {
+            clickedState = super.clickedStateArray[super.mousePressedHelper(rectangleYArray, e.getY())];
+        }
+        else
+        {
+            clickedState = CLICKEDSTATE.OTHER;
+        }
+        menuHandlerObject.repaint();
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e)
+    {
+        clickedState = CLICKEDSTATE.OTHER;
+        menuHandlerObject.repaint();
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e)
+    {
+        if ((super.rectangleX + super.rectangleWidth) >= e.getX() && e.getX() >= super.rectangleX)
+        {
+            if ((rectangleYArray[0] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[0])
+            {
+                for (MenuListener hl : listeners)
+                {
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                }
+            }
+            else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])
+            {
+                for (MenuListener hl : listeners)
+                {
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER);
+                }
+            }
+            else if ((rectangleYArray[2] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[2])
+            {
+                for (MenuListener hl : listeners)
+                {
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SETTINGS);
+                }
+            }
+            else if ((rectangleYArray[3] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[3])
+            {
+                for (MenuListener hl : listeners)
+                {
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.HELP);
+                }
+            }
+            else if ((rectangleYArray[4] + rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[4])
+            {
+                for (MenuListener hl : listeners)
+                {
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.QUIT);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
     }
 }

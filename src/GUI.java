@@ -15,8 +15,10 @@ public class GUI extends JFrame
         this.setMaximumSize(new Dimension(WIDTH, HEIGHT));
         this.setMinimumSize(new Dimension(WIDTH, HEIGHT));
 
-        Menus menu = new Menus();
-        this.add(menu);
+        //Menus menu = new Menus();
+        menuHandler menu = new menuHandler();
+        //this.add(menu);
+        this.setContentPane(menu);
 
         this.pack();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -25,6 +27,7 @@ public class GUI extends JFrame
         this.setLocation(450, 150);
         this.setAlwaysOnTop(true);
         this.setVisible(true);
+        //this.setResizable(true);
     }
 
     public static void main(String[] args)
