@@ -26,8 +26,8 @@ public class BrickBreakerGame {
 
         JFrame obj = new JFrame();
         Gameplay gamePlay = new Gameplay(fileStream);
-        gamePlay.setPreferredSize(new Dimension(700, 600));
-        obj.add(gamePlay);
+        //gamePlay.setPreferredSize(new Dimension(700, 600));
+        //obj.add(gamePlay);
         obj.pack();
         obj.setTitle("Brick Breaker Game");
         obj.setResizable(false);

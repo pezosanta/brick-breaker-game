@@ -2,6 +2,8 @@ package game;
 
 import game.gameObjects.Brick;
 import game.gameObjects.Wall;
+import gui.MenuListener;
+import gui.menuHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,8 +12,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.InputStream;
+import java.util.ArrayList;
 
-public class Gameplay extends JPanel implements KeyListener, ActionListener {
+public class Gameplay implements KeyListener, ActionListener {
     final int panelWidth = 700;
     final int panelHeight = 600;
     final int wallWidth = 3;
@@ -28,6 +31,12 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     private GameMap baseMap;
     private GameMap map;
+
+    private java.util.List<MenuListener> listeners = new ArrayList<MenuListener>();
+    public void addListener(MenuListener listenerToAdd)
+    {
+        listeners.add(listenerToAdd);
+    }
 
     private void reset() {
 
@@ -53,9 +62,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         baseMap = GameMap.loadMapFromCSV(in);
         reset();
 
-        addKeyListener(this);
-        setFocusable(true);
-        setFocusTraversalKeysEnabled(false);
         timer = new Timer(delay,this);
         timer.start();
     }
@@ -64,14 +70,11 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         baseMap = new GameMap();
         reset();
 
-        addKeyListener(this);
-        setFocusable(true);
-        setFocusTraversalKeysEnabled(false);
         timer = new Timer(delay,this);
         timer.start();
     }
 
-    public void paint(Graphics g){
+    public void render(Graphics g){
         //background
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, panelWidth, panelHeight);
@@ -107,9 +110,14 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         if (play) {
             step();
         }
-        repaint();
+
+        for (MenuListener hl : listeners)
+        {
+            hl.gamePaintHandler();
+        }
+
         if (play) {
-            timer.start();
+            //timer.start();
         }
     }
 
@@ -202,10 +210,23 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
                 reset();
                 play = true;
                 score = 0;
-                repaint();
+
+                for (MenuListener hl : listeners)
+                {
+                    hl.gamePaintHandler();
+                }
+            }
+        }
+        if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+        {
+            for (MenuListener hl : listeners)
+            {
+                timer.stop();
+                hl.menuSwitchHandler(menuHandler.MENUSTATE.PAUSE);
             }
         }
     }
+
     public void moveRight(){
         Point paddlepos = map.paddle.getPosition();
         paddlepos.x += 20;

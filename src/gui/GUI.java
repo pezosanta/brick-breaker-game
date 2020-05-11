@@ -23,12 +23,12 @@ public class GUI extends JFrame
 
         this.setContentPane(menu);
 
-        this.pack();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setLocation(450, 150);
         this.setAlwaysOnTop(true);
+        this.pack();
     }
 
     public static void main(String[] args)

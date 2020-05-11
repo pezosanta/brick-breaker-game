@@ -18,6 +18,8 @@ public class menuHandler extends JPanel implements MenuListener
         currentMenu = new mainMenu();
         currentMenu.addListener(this);
 
+        this.setPreferredSize(new Dimension(GUI.WIDTH, GUI.HEIGHT));
+
         this.addMouseListener(currentMenu);
         this.addMouseMotionListener(currentMenu);
 
@@ -31,6 +33,12 @@ public class menuHandler extends JPanel implements MenuListener
         super.paintComponent(g);
         if (menuState == MENUSTATE.SINGLEPLAYER) { game.render(g); }
         else { currentMenu.render(g); }
+    }
+
+    @Override
+    public void gamePaintHandler()
+    {
+        repaint();
     }
 
     @Override
@@ -63,12 +71,12 @@ public class menuHandler extends JPanel implements MenuListener
             case SINGLEPLAYER:
                 menuState = MENUSTATE.SINGLEPLAYER;
 
-                game = new Gameplay();
-                game.addListener(this);
-
                 this.removeMouseListener(currentMenu);
                 this.removeMouseMotionListener(currentMenu);
                 this.removeKeyListener(game);
+
+                game = new Gameplay();
+                game.addListener(this);
 
                 this.addKeyListener(game);
 
