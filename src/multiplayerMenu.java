@@ -3,10 +3,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseListener;
 
-public class multiplayerMenu extends Menu implements MouseMotionListener, MouseListener
+public class multiplayerMenu extends Menu
 {
     private enum BUTTONSTATE {HEROVSVILLAIN, COOPERATION, BACK, OTHER};
 
