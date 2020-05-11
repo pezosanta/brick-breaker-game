@@ -47,12 +47,15 @@ public class menuHandler extends JPanel implements MenuListener
             case MAIN:
                 menuState = MENUSTATE.MAIN;
 
+                this.removeMouseListener(currentMenu);
+                this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
                 currentMenu = new mainMenu();
                 currentMenu.addListener(this);
 
                 this.addMouseListener(currentMenu);
                 this.addMouseMotionListener(currentMenu);
-                this.removeKeyListener(game);
 
                 repaint();
                 break;
@@ -65,6 +68,8 @@ public class menuHandler extends JPanel implements MenuListener
 
                 this.removeMouseListener(currentMenu);
                 this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
                 this.addKeyListener(game);
 
                 this.setFocusable(true);
@@ -79,6 +84,10 @@ public class menuHandler extends JPanel implements MenuListener
             case MULTIPLAYER:
                 menuState = MENUSTATE.MULTIPLAYER;
 
+                this.removeMouseListener(currentMenu);
+                this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
                 currentMenu = new multiplayerMenu();
                 currentMenu.addListener(this);
 
@@ -91,14 +100,19 @@ public class menuHandler extends JPanel implements MenuListener
             case PAUSE:
                 menuState = MENUSTATE.PAUSE;
 
+                this.removeMouseListener(currentMenu);
+                this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
                 currentMenu = new pauseMenu();
                 currentMenu.addListener(this);
 
                 this.addMouseListener(currentMenu);
                 this.addMouseMotionListener(currentMenu);
-                this.removeKeyListener(game);
 
                 repaint();
+
+                game = null;
                 break;
 
             case QUIT:

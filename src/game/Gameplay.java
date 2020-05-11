@@ -101,7 +101,7 @@ public class Gameplay implements KeyListener, ActionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        timer.start();
+        //timer.start();
         if(play){
             if(new Rectangle(ballposX,ballposY,20,20).intersects(new Rectangle(playerX,550,100,8))){
                 ballYdir = - ballYdir;
@@ -205,6 +205,7 @@ public class Gameplay implements KeyListener, ActionListener {
         {
             for (MenuListener hl : listeners)
             {
+                timer.stop();
                 hl.menuSwitchHandler(menuHandler.MENUSTATE.PAUSE);
             }
         }
@@ -218,7 +219,5 @@ public class Gameplay implements KeyListener, ActionListener {
         play = true;
         playerX -= 20;
     }
-
-
 
 }
