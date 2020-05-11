@@ -22,23 +22,24 @@ public class CircularGameObject extends GameObject {
 
     @Override
     public void draw(Graphics2D g) {
+        g.setColor(this.color);
         g.fillOval(position.x, position.y, radius, radius);
     }
 
     @Override
     public boolean collidesWith(GameObject obj) {
-        if (obj.getClass().isInstance(CircularGameObject.class)) {
+        if (obj instanceof CircularGameObject) {
             CircularGameObject circleObj = (CircularGameObject) obj;
             int radiusSum = this.radius + circleObj.getRadius();
             double distance = this.position.distance(circleObj.position);
 
             return radiusSum > distance;
 
-        } else if (obj.getClass().isInstance((RectGameObject.class))) {
+        } else if (obj instanceof RectGameObject) {
             RectGameObject rectObj = (RectGameObject) obj;
             Rectangle rect = rectObj.getRect();
-            int circleDistanceX = Math.abs(this.position.x - rect.x);
-            int circleDistanceY = Math.abs(this.position.y - rect.y);
+            int circleDistanceX = Math.abs(this.position.x + rect.width/2 - rect.x);
+            int circleDistanceY = Math.abs(this.position.y + rect.height/2 - rect.y);
 
             if (circleDistanceX > (rect.width/2 + this.radius)) { return false; }
             if (circleDistanceY > (rect.height/2 + this.radius)) { return false; }

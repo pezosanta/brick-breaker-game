@@ -7,23 +7,28 @@ public class RectGameObject extends GameObject {
         return rect;
     }
 
-    protected final Rectangle rect;
-
-    public RectGameObject(int x, int y, int width, int height) {
+    public void setRect(int x, int y, int width, int height) {
         setPosition(new Point(x, y));
         this.rect = new Rectangle(this.position, new Dimension(width, height));
     }
 
+    protected Rectangle rect;
+
+    public RectGameObject(int x, int y, int width, int height) {
+        setRect(x, y, width, height);
+    }
+
     @Override
     public void draw(Graphics2D g) {
-        g.draw(rect);
+        g.setColor(this.color);
+        g.fill(rect);
     }
 
     @Override
     public boolean collidesWith(GameObject obj) {
-        if (obj.getClass().isInstance(CircularGameObject.class)) {
+        if (obj instanceof CircularGameObject) {
             return obj.collidesWith(this);
-        } else if (obj.getClass().isInstance((RectGameObject.class))) {
+        } else if (obj instanceof RectGameObject) {
             RectGameObject rectObj = (RectGameObject) obj;
             return rect.intersects(rectObj.rect);
         }

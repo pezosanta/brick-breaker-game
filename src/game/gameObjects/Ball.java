@@ -9,8 +9,6 @@ public class Ball extends CircularGameObject {
     }
 
     public void setSpeedX(int speedX) {
-        if (speedX < 0)
-            throw new IllegalArgumentException("Speed must be non-negative!");
         this.speedX = speedX;
     }
 
@@ -19,13 +17,13 @@ public class Ball extends CircularGameObject {
     }
 
     public void setSpeedY(int speedY) {
-        if (speedX < 0)
-            throw new IllegalArgumentException("Speed must be non-negative!");
         this.speedY = speedY;
     }
 
     public Ball(int x, int y, int radius) {
         super(x, y, radius);
+        setSpeedX(0);
+        setSpeedY(0);
     }
 
     public Ball(int x, int y, int radius, int speedX, int speedY) {

@@ -15,6 +15,7 @@ public class Paddle extends RectGameObject {
 
     public Paddle(int x, int y, int width, int height) {
         super(x, y, width, height);
+        setSpeedX(0);
     }
 
     public Paddle(int x, int y, int width, int height, int speedX) {
