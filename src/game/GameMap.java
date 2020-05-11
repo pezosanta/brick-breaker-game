@@ -19,8 +19,8 @@ public class GameMap {
     public int brickHeight;
 
     public GameMap() {
-        brickWidth = 540/COLS;
-        brickHeight = 150/ROWS;
+        brickWidth = 560/COLS;
+        brickHeight = 160/ROWS;
 
         bricks = new Brick[ROWS][COLS];
         for (int i=0; i<bricks.length; i++) {

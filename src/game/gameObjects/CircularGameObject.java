@@ -23,7 +23,7 @@ public class CircularGameObject extends GameObject {
     @Override
     public void draw(Graphics2D g) {
         g.setColor(this.color);
-        g.fillOval(position.x, position.y, radius, radius);
+        g.fillOval(position.x - radius/2, position.y - radius/2, radius, radius);
     }
 
     @Override
@@ -38,17 +38,26 @@ public class CircularGameObject extends GameObject {
         } else if (obj instanceof RectGameObject) {
             RectGameObject rectObj = (RectGameObject) obj;
             Rectangle rect = rectObj.getRect();
-            int circleDistanceX = Math.abs(this.position.x - rect.width/2 - rect.x);
-            int circleDistanceY = Math.abs(this.position.y - rect.height/2 - rect.y);
 
-            if (circleDistanceX > (rect.width/2 + this.radius)) { return false; }
-            if (circleDistanceY > (rect.height/2 + this.radius)) { return false; }
+            int distanceX = Math.abs(this.position.x - (rect.x + rect.width/2));
+            int distanceY = Math.abs(this.position.y - (rect.y + rect.height/2));
 
-            if (circleDistanceX <= (rect.width/2)) { return true; }
-            if (circleDistanceY <= (rect.height/2)) { return true; }
+            if (distanceX > (rect.width/2 + this.radius)) {
+                return false;
+            }
+            if (distanceY > (rect.height/2 + this.radius)) {
+                return false;
+            }
 
-            float cornerDistance_sq = (circleDistanceX - rect.width/2)^2 +
-                    (circleDistanceY - rect.height/2)^2;
+            if (distanceX <= (rect.width/2)) {
+                return true;
+            }
+            if (distanceY <= (rect.height/2)) {
+                return true;
+            }
+
+            double cornerDistance_sq = Math.pow((distanceX - rect.width/2.0), 2) +
+                    Math.pow(distanceY - rect.height/2.0, 2);
 
             return (cornerDistance_sq <= (this.radius^2));
         }

@@ -7,8 +7,14 @@ public class RectGameObject extends GameObject {
         return rect;
     }
 
+    @Override
+    public void setPosition(Point position) {
+        super.setPosition(position);
+        this.rect = new Rectangle(position, new Dimension(rect.width, rect.height));
+    }
+
     public void setRect(int x, int y, int width, int height) {
-        setPosition(new Point(x, y));
+        position = new Point(x, y);
         this.rect = new Rectangle(this.position, new Dimension(width, height));
     }
 
@@ -21,7 +27,7 @@ public class RectGameObject extends GameObject {
     @Override
     public void draw(Graphics2D g) {
         g.setColor(this.color);
-        g.fill(rect);
+        g.fill(this.rect);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package game;
 
 import game.gameObjects.Brick;
+import game.gameObjects.Wall;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +11,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class Gameplay extends JPanel implements KeyListener, ActionListener {
+    final int panelWidth = 700;
+    final int panelHeight = 600;
+    final int wallWidth = 3;
+    final int paddleWidth = 100;
+    final int paddleHeight = 8;
+    final int ballRadius = 20;
+
     private boolean play = false;
+    private boolean firstRun = true;
     private int score = 0;
 
     private Timer timer;
@@ -18,23 +27,28 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     private GameMap map;
 
-    public Gameplay(){
+    private void reset() {
+
         map = new GameMap();
 
         //borders
-        map.walls[0].setRect(0, 0, 3, 592);
-        map.walls[1].setRect(0, 0, 692, 3);
-        map.walls[2].setRect(681, 0, 3, 592);
-        //map.walls[3].setRect(681, 0, 3, 592);
+        map.walls[0].setRect(0, 0, wallWidth, panelHeight);
+        map.walls[1].setRect(0, 0, panelWidth, wallWidth);
+        map.walls[2].setRect(panelWidth-wallWidth, 0, wallWidth, panelHeight);
+        map.walls[3].setRect(0, panelHeight-wallWidth, panelWidth, wallWidth);
 
         //the paddle
-        map.paddle.setRect(320, 550,100,8);
+        map.paddle.setRect(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
 
         //ball
-        map.ball.setRadius(20);
+        map.ball.setRadius(ballRadius);
         map.ball.setPosition(new Point(120, 350));
         map.ball.setSpeedX(-1);
         map.ball.setSpeedY(-2);
+    }
+
+    public Gameplay(){
+        reset();
 
         addKeyListener(this);
         setFocusable(true);
@@ -46,7 +60,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     public void paint(Graphics g){
         //background
         g.setColor(Color.BLACK);
-        g.fillRect(1,1,692,592);
+        g.fillRect(0, 0, panelWidth, panelHeight);
 
         //drawing map
         map.draw((Graphics2D) g);
@@ -54,24 +68,16 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         //scores
         g.setColor(Color.white);
         g.setFont(new Font("serif",Font.BOLD,25));
-        g.drawString(""+score,590,30);
+        g.drawString(""+score,panelWidth*4/5,25+2*wallWidth);
 
-        if (map.getAvailableBricks() <= 0) {
-            play = false;
-            map.ball.setPosition(new Point(0, 0));
+        if (!play && map.getAvailableBricks() <= 0) {
             g.setColor(Color.RED);
             g.setFont(new Font("serif",Font.BOLD,30));
             g.drawString("You Won!",260,300);
 
             g.setFont(new Font("serif",Font.BOLD,20));
             g.drawString("Press Enter to Restart",230,350);
-        }
-
-        if (map.ball.getPosition().y + map.ball.getRadius() > 570){
-            play = false;
-            map.ball.setSpeedX(0);
-            map.ball.setSpeedY(0);
-
+        } else if (!play && !firstRun){
             g.setColor(Color.RED);
             g.setFont(new Font("serif",Font.BOLD,25));
             g.drawString("Game Over, Your score: " + String.valueOf(score),190,300);
@@ -84,60 +90,64 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(play){
-            if (map.ball.collidesWith(map.paddle)) {
-                map.ball.collidesWith(map.paddle);
-                map.ball.setSpeedY( -1 * map.ball.getSpeedY() );
+        if (play) {
+            step();
+        }
+        repaint();
+        if (play) {
+            timer.start();
+        }
+    }
+
+    private void step() {
+        boolean hitBottomWall = handleCollisions();
+        if (hitBottomWall || map.getAvailableBricks() == 0) {
+            play = false;
+            firstRun = false;
+        } else {
+            moveBallAndPaddle();
+        }
+    }
+
+    private void moveBallAndPaddle() {
+        // Move ball
+        Point ballpos = map.ball.getPosition();
+        ballpos.x += map.ball.getSpeedX();
+        ballpos.y += map.ball.getSpeedY();
+        map.ball.setPosition(ballpos);
+
+        // TODO: Move paddle
+    }
+
+    private boolean handleCollisions() {
+        // Paddle
+        if (map.ball.collidesWith(map.paddle)) {
+            map.ball.handleCollisionWith(map.paddle);
+        }
+
+        // Walls
+        for (Wall wall : map.walls) {
+            if (map.ball.collidesWith(wall)) {
+                map.ball.handleCollisionWith(wall);
             }
-            //logic with bricks
-            A: for (int i = 0; i < map.bricks.length; i++){
-                for (int j = 0; j < map.bricks[i].length; j++){
-                    if (map.bricks[i][j].getHealth() > 0){
-                        Rectangle brickRect = map.bricks[i][j].getRect();
-                        Brick cbrick = map.bricks[i][j];
+        }
+        if (map.ball.collidesWith(map.walls[map.walls.length - 1])) {
+            return true;
+        }
 
-                        if (map.ball.collidesWith(map.bricks[i][j])) {
-                            map.bricks[i][j].decreaseHealth();
-                            score += 5;
-
-                            /*int diffx = Math.abs(map.ball.getPosition().x - brickRect.x);
-                            int diffy = Math.abs(map.ball.getPosition().y - brickRect.y);
-
-                            if (diffx / brickRect.width >= diffy / brickRect.height) {
-                                map.ball.setSpeedX( -1 * map.ball.getSpeedX() );
-                            } else {
-                                map.ball.setSpeedY( -1 * map.ball.getSpeedY() );
-                            }*/
-
-                            if (map.ball.getPosition().x + 19 <= brickRect.x ||
-                                    map.ball.getPosition().x + 1 >= brickRect.x + brickRect.width) {
-                                map.ball.setSpeedX( -1 * map.ball.getSpeedX() );
-                            } else {
-                                map.ball.setSpeedY( -1 * map.ball.getSpeedY() );
-                            }
-                            break A;
-                        }
-                    }
+        // Bricks
+        A: for (int i = 0; i < map.bricks.length; i++){
+            for (int j = 0; j < map.bricks[i].length; j++){
+                if (map.bricks[i][j].getHealth() > 0 && map.ball.collidesWith(map.bricks[i][j])) {
+                    map.ball.handleCollisionWith(map.bricks[i][j]);
+                    map.bricks[i][j].decreaseHealth();
+                    score += 5;
+                    break A;
                 }
-            }
-
-            Point ballpos = map.ball.getPosition();
-            ballpos.x += map.ball.getSpeedX();
-            ballpos.y += map.ball.getSpeedY();
-            map.ball.setPosition(ballpos);
-            if (map.ball.collidesWith(map.walls[0])){
-                map.ball.setSpeedX( -1 * map.ball.getSpeedX() );
-            }
-            if(map.ball.collidesWith(map.walls[1])){
-                map.ball.setSpeedY( -1 * map.ball.getSpeedY() );
-            }
-            if(map.ball.collidesWith(map.walls[2])){
-                map.ball.setSpeedX( -1 * map.ball.getSpeedX() );
             }
         }
 
-        repaint();
-        timer.start();
+        return false;
     }
 
     @Override
@@ -147,7 +157,14 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-
+        /*switch (e.getKeyCode()) {
+            case KeyEvent.VK_RIGHT: {
+                map.paddle.setSpeedX(map.paddle.getSpeedX() + 20);
+            }
+            case KeyEvent.VK_LEFT: {
+                map.paddle.setSpeedX(map.paddle.getSpeedX() - 20);
+            }
+        }*/
     }
 
     @Override
@@ -159,40 +176,34 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
                 moveRight();
             }
         }
-        if(e.getKeyCode() == KeyEvent.VK_LEFT){
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
             if (map.paddle.getPosition().x <= 10){
                 map.paddle.setPosition(new Point(10, map.paddle.getPosition().y));
             } else {
                 moveLeft();
             }
         }
-        if (e.getKeyCode() == KeyEvent.VK_ENTER){
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             if (!play) {
+                reset();
                 play = true;
-                map = new GameMap();
-                map.ball.setPosition(new Point(120, 350));
-                map.ball.setSpeedX(-1);
-                map.ball.setSpeedY(-2);
-                map.paddle.setPosition(new Point(310, map.paddle.getPosition().y));
                 score = 0;
                 repaint();
             }
         }
     }
     public void moveRight(){
-        play = true;
         Point paddlepos = map.paddle.getPosition();
         paddlepos.x += 20;
         map.paddle.setPosition(paddlepos);
+        play = true;
     }
 
     public void moveLeft(){
-        play = true;
         Point paddlepos = map.paddle.getPosition();
         paddlepos.x -= 20;
         map.paddle.setPosition(paddlepos);
+        play = true;
     }
-
-
 
 }
