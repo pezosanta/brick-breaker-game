@@ -5,7 +5,7 @@ import java.awt.geom.Point2D;
 
 public abstract class GameObject {
     protected Point position;
-    protected Color color;
+    protected Color color = Color.GRAY;
 
     public Point getPosition() {
         return position;

@@ -15,7 +15,6 @@ public class GameMap {
     public final Ball ball;
     public final Paddle paddle;
 
-    public int[][] map;
     public int brickWidth;
     public int brickHeight;
 

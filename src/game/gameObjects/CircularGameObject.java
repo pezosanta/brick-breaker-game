@@ -38,8 +38,8 @@ public class CircularGameObject extends GameObject {
         } else if (obj instanceof RectGameObject) {
             RectGameObject rectObj = (RectGameObject) obj;
             Rectangle rect = rectObj.getRect();
-            int circleDistanceX = Math.abs(this.position.x + rect.width/2 - rect.x);
-            int circleDistanceY = Math.abs(this.position.y + rect.height/2 - rect.y);
+            int circleDistanceX = Math.abs(this.position.x - rect.width/2 - rect.x);
+            int circleDistanceY = Math.abs(this.position.y - rect.height/2 - rect.y);
 
             if (circleDistanceX > (rect.width/2 + this.radius)) { return false; }
             if (circleDistanceY > (rect.height/2 + this.radius)) { return false; }
