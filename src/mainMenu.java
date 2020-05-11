@@ -6,7 +6,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseListener;
 
-public class mainMenu extends Menu implements MouseMotionListener, MouseListener
+public class mainMenu extends Menu //implements MouseMotionListener, MouseListener
 {
     private enum BUTTONSTATE {SINGLEPLAYER, MULTIPLAYER, SETTINGS, HELP, QUIT, OTHER};
 
@@ -23,14 +23,7 @@ public class mainMenu extends Menu implements MouseMotionListener, MouseListener
     private final Rectangle helpButton              = new Rectangle(super.rectangleX, rectangleYArray[3], super.rectangleWidth, super.rectangleHeight);
     private final Rectangle quitButton              = new Rectangle(super.rectangleX, rectangleYArray[4], super.rectangleWidth, super.rectangleHeight);
 
-    private menuHandler menuHandlerObject;
-
-    public mainMenu(menuHandler mh)
-    {
-        menuHandlerObject = mh;
-        menuHandlerObject.addMouseListener(this);
-        menuHandlerObject.addMouseMotionListener(this);
-    }
+    public mainMenu() {}
 
     @Override
     public void render(Graphics g)
@@ -115,7 +108,11 @@ public class mainMenu extends Menu implements MouseMotionListener, MouseListener
         {
             buttonState = BUTTONSTATE.OTHER;
         }
-        menuHandlerObject.repaint();
+
+        for (MenuListener hl : listeners)
+        {
+            hl.menuPaintHandler();
+        }
     }
 
     @Override
@@ -129,14 +126,22 @@ public class mainMenu extends Menu implements MouseMotionListener, MouseListener
         {
             clickedState = CLICKEDSTATE.OTHER;
         }
-        menuHandlerObject.repaint();
+        //menuHandlerObject.repaint();
+        for (MenuListener hl : listeners)
+        {
+            hl.menuPaintHandler();
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e)
     {
         clickedState = CLICKEDSTATE.OTHER;
-        menuHandlerObject.repaint();
+        //menuHandlerObject.repaint();
+        for (MenuListener hl : listeners)
+        {
+            hl.menuPaintHandler();
+        }
     }
 
     @Override

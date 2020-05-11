@@ -21,14 +21,7 @@ public class multiplayerMenu extends Menu implements MouseMotionListener, MouseL
     private final Rectangle cooperationButton       = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
     private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
 
-    private menuHandler menuHandlerObject;
-
-    public multiplayerMenu(menuHandler mh)
-    {
-        menuHandlerObject = mh;
-        menuHandlerObject.addMouseListener(this);
-        menuHandlerObject.addMouseMotionListener(this);
-    }
+    public multiplayerMenu(){}
 
     @Override
     public void render(Graphics g)
@@ -93,7 +86,11 @@ public class multiplayerMenu extends Menu implements MouseMotionListener, MouseL
         {
             buttonState = BUTTONSTATE.OTHER;
         }
-        menuHandlerObject.repaint();
+
+        for (MenuListener hl : listeners)
+        {
+            hl.menuPaintHandler();
+        }
     }
 
     @Override
@@ -107,14 +104,21 @@ public class multiplayerMenu extends Menu implements MouseMotionListener, MouseL
         {
             clickedState = CLICKEDSTATE.OTHER;
         }
-        menuHandlerObject.repaint();
+
+        for (MenuListener hl : listeners)
+        {
+            hl.menuPaintHandler();
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e)
     {
         clickedState = CLICKEDSTATE.OTHER;
-        menuHandlerObject.repaint();
+        for (MenuListener hl : listeners)
+        {
+            hl.menuPaintHandler();
+        }
     }
 
     @Override
