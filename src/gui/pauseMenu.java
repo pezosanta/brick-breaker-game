@@ -54,8 +54,8 @@ public class pauseMenu extends Menu
         Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
         g.setColor(super.fontColor);
-        g.drawString("Resume", resumeButton.x + 100, resumeButton.y + 35);
-        g.drawString("Back", backButton.x + 112, backButton.y + 35);
+        g.drawString("Resume", resumeButton.x + 90, resumeButton.y + 35);
+        g.drawString("Back to Main", backButton.x + 56, backButton.y + 35);
 
         clickedState = Menu.CLICKEDSTATE.OTHER;
     }
