@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.InputStream;
 
 public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private boolean play = false;
@@ -24,6 +25,15 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private int ballYdir = -2;
 
     private MapGenerator map;
+
+    public Gameplay(InputStream in){
+        map = MapGenerator.loadMapFromCSV(in);
+        addKeyListener(this);
+        setFocusable(true);
+        setFocusTraversalKeysEnabled(false);
+        timer = new Timer(delay,this);
+        timer.start();
+    }
 
     public Gameplay(){
         map = new MapGenerator(3,7);

@@ -6,8 +6,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 import java.io.File;
 
 public class BrickBreakerGame {
@@ -24,11 +22,9 @@ public class BrickBreakerGame {
     public void startGame(String filename) {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         InputStream fileStream = classloader.getResourceAsStream(filename);
-        //Gameplay gamePlay = new Gameplay(fileStream);
-
 
         JFrame obj = new JFrame();
-        Gameplay gamePlay = new Gameplay();
+        Gameplay gamePlay = new Gameplay(fileStream);
         obj.setBounds(10,10,700,600);
         obj.setTitle("Brick Breaker Game");
         obj.setResizable(false);
@@ -49,7 +45,8 @@ public class BrickBreakerGame {
         BrickBreakerGame game = new BrickBreakerGame();
         ArrayList<String> maps = game.getAvailableMaps();
         System.out.println(maps.size());
+        game.startGame(maps.get(1));
 
-        game.showGUI();
+        //game.showGUI();
     }
 }
