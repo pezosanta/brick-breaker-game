@@ -16,6 +16,13 @@ public class Brick extends RectGameObject {
         return health;
     }
 
+    public void setHealth(int health) {
+        if (health < 0) {
+            throw new IllegalArgumentException("Health cannot be less than zero!");
+        }
+        this.health = health;
+    }
+
     public boolean decreaseHealth() {
         if (health < 1)
             return true;

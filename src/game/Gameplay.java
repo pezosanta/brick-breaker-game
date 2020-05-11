@@ -26,11 +26,12 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private Timer timer;
     private int delay = 8;
 
+    private GameMap baseMap;
     private GameMap map;
 
     private void reset() {
 
-        map = new GameMap();
+        map = baseMap;
 
         //borders
         map.walls[0].setRect(0, 0, wallWidth, panelHeight);
@@ -49,7 +50,9 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     }
 
     public Gameplay(InputStream in){
-        map = MapGenerator.loadMapFromCSV(in);
+        baseMap = GameMap.loadMapFromCSV(in);
+        reset();
+
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
@@ -58,6 +61,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     }
 
     public Gameplay(){
+        baseMap = new GameMap();
         reset();
 
         addKeyListener(this);

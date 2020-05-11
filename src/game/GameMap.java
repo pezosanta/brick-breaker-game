@@ -3,8 +3,10 @@ package game;
 import game.gameObjects.*;
 
 import java.awt.*;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class GameMap {
     public static final int ROWS = 4;
@@ -68,5 +70,37 @@ public class GameMap {
         for (GameObject obj : getAllGameObjects()) {
             obj.draw(g);
         }
+    }
+
+    public static GameMap loadMapFromCSV(InputStream in) {
+        int rows = 0;
+        int cols = 0;
+        ArrayList<Integer> values = new ArrayList<>();
+
+        Scanner scanner = new Scanner(in);
+        while (scanner.hasNextLine()) {
+            rows += 1;
+            String line = scanner.nextLine();
+            String[] parts = line.split(",|;");
+            cols = parts.length;
+            for (String s : parts) {
+                values.add(Integer.valueOf(s));
+                System.out.print(s + "|");
+            }
+        }
+        scanner.close();
+
+        if (rows != ROWS || cols != COLS) {
+            System.err.println("Something's wrong man in CSV loading!" + rows + cols);
+            return new GameMap();
+        }
+
+        GameMap mapgen = new GameMap();
+        for (int i=0; i<mapgen.bricks.length; i++) {
+            for (int j=0; j< mapgen.bricks[i].length; j++) {
+                mapgen.bricks[i][j].setHealth(values.get(i*cols + j));
+            }
+        }
+        return mapgen;
     }
 }

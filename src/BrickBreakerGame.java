@@ -2,6 +2,7 @@ import game.Gameplay;
 import gui.GUI;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -25,12 +26,13 @@ public class BrickBreakerGame {
 
         JFrame obj = new JFrame();
         Gameplay gamePlay = new Gameplay(fileStream);
-        obj.setBounds(10,10,700,600);
+        gamePlay.setPreferredSize(new Dimension(700, 600));
+        obj.add(gamePlay);
+        obj.pack();
         obj.setTitle("Brick Breaker Game");
         obj.setResizable(false);
-        obj.setVisible(true);
         obj.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        obj.add(gamePlay);
+        obj.setVisible(true);
     }
 
     public ArrayList<String> getAvailableMaps() {
