@@ -5,9 +5,8 @@ import javax.swing.*;
 
 public class GUI extends JFrame
 {
-    // Merge branch test
-    public static final int WIDTH   = 640;
-    public static final int HEIGHT  = 480;
+    public static final int WIDTH   = 700; //640;
+    public static final int HEIGHT  = 600; //480;
 
     public final String TITLE       = "Brick Breaker Game";
 
@@ -17,6 +16,8 @@ public class GUI extends JFrame
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setMaximumSize(new Dimension(WIDTH, HEIGHT));
         this.setMinimumSize(new Dimension(WIDTH, HEIGHT));
+
+        this.setBounds(10,10,700,600);
 
         menuHandler menu = new menuHandler();
 

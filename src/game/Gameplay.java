@@ -1,14 +1,18 @@
 package game;
 
+import gui.MenuListener;
+import gui.menuHandler;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 
-public class Gameplay extends JPanel implements KeyListener, ActionListener {
-    private boolean play = false;
+public class Gameplay implements KeyListener, ActionListener {
+    private boolean play = true;//false;
     private int score = 0;
 
     private int totalBricks = 21;
@@ -25,17 +29,23 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     private MapGenerator map;
 
+    protected java.util.List<MenuListener> listeners = new ArrayList<MenuListener>();
+    public void addListener(MenuListener listenerToAdd)
+    {
+        listeners.add(listenerToAdd);
+    }
+
     public Gameplay(){
         map = new MapGenerator(3,7);
-        addKeyListener(this);
-        setFocusable(true);
-        setFocusTraversalKeysEnabled(false);
+        //addKeyListener(this);
+        //setFocusable(true);
+        //setFocusTraversalKeysEnabled(false);
         timer = new Timer(delay,this);
         timer.start();
     }
 
-    public void paint(Graphics g){
-        //backgroun
+    public void render(Graphics g){
+        //background
         g.setColor(Color.black);
         g.fillRect(1,1,692,592);
 
@@ -138,7 +148,11 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
             }
         }
 
-        repaint();
+        //repaint();
+        for (MenuListener hl : listeners)
+        {
+            hl.menuPaintHandler();
+        }
     }
 
     @Override
@@ -180,7 +194,18 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
                 score = 0;
                 totalBricks = 21;
                 map = new MapGenerator(3, 7);
-                repaint();
+                //repaint();
+                for (MenuListener hl : listeners)
+                {
+                    hl.menuPaintHandler();
+                }
+            }
+        }
+        else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+        {
+            for (MenuListener hl : listeners)
+            {
+                hl.menuSwitchHandler(menuHandler.MENUSTATE.PAUSE);
             }
         }
     }
