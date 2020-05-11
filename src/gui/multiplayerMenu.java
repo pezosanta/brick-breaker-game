@@ -1,27 +1,27 @@
+package gui;
+
 import java.awt.Rectangle;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
 
-public class mainMenu extends Menu
+public class multiplayerMenu extends Menu
 {
-    private enum BUTTONSTATE {SINGLEPLAYER, MULTIPLAYER, SETTINGS, HELP, QUIT, OTHER};
+    private enum BUTTONSTATE {HEROVSVILLAIN, COOPERATION, BACK, OTHER};
 
     private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
     private BUTTONSTATE buttonState                 = BUTTONSTATE.OTHER;
     private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]
-            { BUTTONSTATE.SINGLEPLAYER, BUTTONSTATE.MULTIPLAYER, BUTTONSTATE.SETTINGS, BUTTONSTATE.HELP, BUTTONSTATE.QUIT, BUTTONSTATE.OTHER };
+            { BUTTONSTATE.HEROVSVILLAIN, BUTTONSTATE.COOPERATION, BUTTONSTATE.BACK, BUTTONSTATE.OTHER };
 
-    private final int[] rectangleYArray             = new int[]{ 120, 175, 230, 285, 340 };
+    private final int[] rectangleYArray             = new int[]{ 120, 175, 230 };
 
-    private final Rectangle singlePlayerButton      = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle multiplayerButton       = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle settingsButton          = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle helpButton              = new Rectangle(super.rectangleX, rectangleYArray[3], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle quitButton              = new Rectangle(super.rectangleX, rectangleYArray[4], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle heroVsVillainButton     = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle cooperationButton       = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
 
-    public mainMenu() {}
+    public multiplayerMenu(){}
 
     @Override
     public void render(Graphics g)
@@ -31,66 +31,46 @@ public class mainMenu extends Menu
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setColor(super.inactiveColor);
-        g2d.fill(singlePlayerButton);
-        g2d.fill(multiplayerButton);
-        g2d.fill(settingsButton);
-        g2d.fill(helpButton);
-        g2d.fill(quitButton);
+        g2d.fill(heroVsVillainButton);
+        g2d.fill(cooperationButton);
+        g2d.fill(backButton);
 
         switch(buttonState)
         {
-            case SINGLEPLAYER:
+            case HEROVSVILLAIN:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(singlePlayerButton);
+                g2d.fill(heroVsVillainButton);
                 break;
 
-            case MULTIPLAYER:
+            case COOPERATION:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(multiplayerButton);
+                g2d.fill(cooperationButton);
                 break;
 
-            case SETTINGS:
+            case BACK:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(settingsButton);
-                break;
-
-            case HELP:
-                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
-                else { g2d.setColor(super.activeColor); }
-
-                g2d.fill(helpButton);
-                break;
-
-            case QUIT:
-                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
-                else { g2d.setColor(super.activeColor); }
-
-                g2d.fill(quitButton);
+                g2d.fill(backButton);
                 break;
 
             default:
                 g2d.setColor(super.inactiveColor);
-                g2d.fill(singlePlayerButton);
-                g2d.fill(multiplayerButton);
-                g2d.fill(settingsButton);
-                g2d.fill(helpButton);
-                g2d.fill(quitButton);
+                g2d.fill(heroVsVillainButton);
+                g2d.fill(cooperationButton);
+                g2d.fill(backButton);
         }
 
         Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
         g.setColor(super.fontColor);
-        g.drawString("Single player", singlePlayerButton.x + 54, singlePlayerButton.y + 35);
-        g.drawString("Multiplayer", multiplayerButton.x + 70, multiplayerButton.y + 35);
-        g.drawString("Settings", settingsButton.x + 90, settingsButton.y + 35);
-        g.drawString("Help", helpButton.x + 118, helpButton.y + 35);
-        g.drawString("Quit", quitButton.x + 118, quitButton.y + 35);
+        g.drawString("Hero vs Villain", heroVsVillainButton.x + 46, heroVsVillainButton.y + 35);
+        g.drawString("CO-OP", cooperationButton.x + 98, cooperationButton.y + 35);
+        g.drawString("Back", backButton.x + 112, backButton.y + 35);
 
         clickedState = CLICKEDSTATE.OTHER;
     }
@@ -124,7 +104,7 @@ public class mainMenu extends Menu
         {
             clickedState = CLICKEDSTATE.OTHER;
         }
-        //menuHandlerObject.repaint();
+
         for (MenuListener hl : listeners)
         {
             hl.menuPaintHandler();
@@ -135,7 +115,6 @@ public class mainMenu extends Menu
     public void mouseReleased(MouseEvent e)
     {
         clickedState = CLICKEDSTATE.OTHER;
-        //menuHandlerObject.repaint();
         for (MenuListener hl : listeners)
         {
             hl.menuPaintHandler();
@@ -151,35 +130,21 @@ public class mainMenu extends Menu
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.HEROVSVILLAIN);
                 }
             }
             else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.COOPERATION);
                 }
             }
             else if ((rectangleYArray[2] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[2])
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SETTINGS);
-                }
-            }
-            else if ((rectangleYArray[3] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[3])
-            {
-                for (MenuListener hl : listeners)
-                {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.HELP);
-                }
-            }
-            else if ((rectangleYArray[4] + rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[4])
-            {
-                for (MenuListener hl : listeners)
-                {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.QUIT);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN);
                 }
             }
         }
