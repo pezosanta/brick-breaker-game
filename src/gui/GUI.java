@@ -13,22 +13,18 @@ public class GUI extends JFrame
     public GUI()
     {
         this.setTitle(TITLE);
-        this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        this.setMaximumSize(new Dimension(WIDTH, HEIGHT));
-        this.setMinimumSize(new Dimension(WIDTH, HEIGHT));
-
-        this.setBounds(10,10,700,600);
 
         menuHandler menu = new menuHandler();
+        menu.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
         this.setContentPane(menu);
+        this.pack();
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setLocation(450, 150);
         this.setAlwaysOnTop(true);
-        this.pack();
     }
 
     public static void main(String[] args)
