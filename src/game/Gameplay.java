@@ -1,18 +1,15 @@
 package game;
 
-import gui.MenuListener;
-import gui.menuHandler;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
+import java.io.InputStream;
 
-public class Gameplay implements KeyListener, ActionListener {
-    private boolean play = true;//false;
+public class Gameplay extends JPanel implements KeyListener, ActionListener {
+    private boolean play = false;
     private int score = 0;
 
     private int totalBricks = 21;
@@ -29,23 +26,26 @@ public class Gameplay implements KeyListener, ActionListener {
 
     private MapGenerator map;
 
-    protected java.util.List<MenuListener> listeners = new ArrayList<MenuListener>();
-    public void addListener(MenuListener listenerToAdd)
-    {
-        listeners.add(listenerToAdd);
-    }
-
-    public Gameplay(){
-        map = new MapGenerator(3,7);
-        //addKeyListener(this);
-        //setFocusable(true);
-        //setFocusTraversalKeysEnabled(false);
+    public Gameplay(InputStream in){
+        map = MapGenerator.loadMapFromCSV(in);
+        addKeyListener(this);
+        setFocusable(true);
+        setFocusTraversalKeysEnabled(false);
         timer = new Timer(delay,this);
         timer.start();
     }
 
-    public void render(Graphics g){
-        //background
+    public Gameplay(){
+        map = new MapGenerator(3,7);
+        addKeyListener(this);
+        setFocusable(true);
+        setFocusTraversalKeysEnabled(false);
+        timer = new Timer(delay,this);
+        timer.start();
+    }
+
+    public void paint(Graphics g){
+        //backgroun
         g.setColor(Color.black);
         g.fillRect(1,1,692,592);
 
@@ -101,7 +101,7 @@ public class Gameplay implements KeyListener, ActionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        //timer.start();
+        timer.start();
         if(play){
             if(new Rectangle(ballposX,ballposY,20,20).intersects(new Rectangle(playerX,550,100,8))){
                 ballYdir = - ballYdir;
@@ -148,11 +148,7 @@ public class Gameplay implements KeyListener, ActionListener {
             }
         }
 
-        //repaint();
-        for (MenuListener hl : listeners)
-        {
-            hl.menuPaintHandler();
-        }
+        repaint();
     }
 
     @Override
@@ -194,19 +190,7 @@ public class Gameplay implements KeyListener, ActionListener {
                 score = 0;
                 totalBricks = 21;
                 map = new MapGenerator(3, 7);
-                //repaint();
-                for (MenuListener hl : listeners)
-                {
-                    hl.menuPaintHandler();
-                }
-            }
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-        {
-            for (MenuListener hl : listeners)
-            {
-                timer.stop();
-                hl.menuSwitchHandler(menuHandler.MENUSTATE.PAUSE);
+                repaint();
             }
         }
     }
@@ -219,5 +203,7 @@ public class Gameplay implements KeyListener, ActionListener {
         play = true;
         playerX -= 20;
     }
+
+
 
 }

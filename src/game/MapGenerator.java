@@ -1,6 +1,9 @@
 package game;
 
 import java.awt.*;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class MapGenerator {
     public int map[][];
@@ -33,5 +36,36 @@ public class MapGenerator {
     }
     public void setBrickValue(int value, int row, int col){
         map[row][col] = value;
+    }
+
+    public static MapGenerator loadMapFromCSV(InputStream in) {
+        int rows = 0;
+        int cols = 0;
+        ArrayList<Integer> values = new ArrayList<>();
+
+        Scanner scanner = new Scanner(in);
+        while (scanner.hasNextLine()) {
+            rows += 1;
+            String line = scanner.nextLine();
+            String[] parts = line.split(",|;");
+            cols = parts.length;
+            for (String s : parts) {
+                values.add(Integer.valueOf(s));
+            }
+        }
+        scanner.close();
+
+        if (rows * cols != values.size()) {
+            System.err.println("Something wrong man in CSV loading!" + rows + cols);
+            return new MapGenerator(3, 7);
+        }
+
+        MapGenerator mapgen = new MapGenerator(rows, cols);
+        for (int i=0; i<mapgen.map.length; i++) {
+            for (int j=0; j< mapgen.map[i].length; j++) {
+                mapgen.map[i][j] = values.get(i*cols + j);
+            }
+        }
+        return mapgen;
     }
 }
