@@ -5,6 +5,7 @@ import javax.swing.*;
 
 public class GUI extends JFrame
 {
+    // Merge branch test
     public static final int WIDTH   = 640;
     public static final int HEIGHT  = 480;
 
