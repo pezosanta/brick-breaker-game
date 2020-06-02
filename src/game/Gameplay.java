@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import static java.lang.StrictMath.abs;
+
 public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private boolean play = false;
     private int score = 0;
@@ -14,16 +16,21 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private int totalBricks = 21;
 
     private Timer timer;
-    private int delay = 8;
+    private int delay = 16;
 
     private int playerX = 320;
+    private int playerSpeed = 0;
 
-    private int ballposX = 120;
+    private int ballposX = 240;
     private int ballposY = 350;
-    private int ballXdir = -1;
-    private int ballYdir = -2;
+    private int ballXdir = -3;
+    private int ballYdir = -4;
+
+    private int racketWidth = 100;
 
     private MapGenerator map;
+    private double speed = 1;
+    private double size = 1;
 
     public Gameplay(){
         map = new MapGenerator(3,7);
@@ -35,7 +42,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     }
 
     public void paint(Graphics g){
-        //backgroun
+        //background
         g.setColor(Color.black);
         g.fillRect(1,1,692,592);
 
@@ -56,11 +63,18 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
         //the paddle
         g.setColor(Color.green);
-        g.fillRect(playerX, 550,100,8);
+        g.fillRect(playerX, 550,racketWidth,8);
 
         //ball
         g.setColor(Color.yellow);
         g.fillOval(ballposX,ballposY,20,20);
+
+        g.setColor(Color.white);
+        g.setFont(new Font("serif",Font.BOLD,12));
+        g.drawString("Current ball speed amplifier:",10,15);
+        g.drawString(String.valueOf(speed), 200, 15);
+        g.drawString("Current racket amplifier:",10,30);
+        g.drawString(String.valueOf(size), 200, 30);
 
         if(totalBricks <= 0){
             play = false;
@@ -93,13 +107,58 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     public void actionPerformed(ActionEvent e) {
         timer.start();
         if(play){
-            if(new Rectangle(ballposX,ballposY,20,20).intersects(new Rectangle(playerX,550,100,8))){
-                ballYdir = - ballYdir;
+
+            if(new Rectangle(ballposX,ballposY,20,20).intersects(new Rectangle(playerX,550,racketWidth,8))){
+                if ((ballposX - playerX) <= (racketWidth*0.2)){
+                    if(ballXdir > 0){
+                        ballXdir = 5;
+                    }
+                    else{
+                        ballXdir = -5;
+                    }
+                    ballYdir = -1;
+                }
+                if (((ballposX - playerX) <= (racketWidth*0.4)) && ((ballposX - playerX) > (racketWidth*0.2))){
+                    if(ballXdir > 0){
+                        ballXdir = 4;
+                    }
+                    else{
+                        ballXdir = -4;
+                    }
+                    ballYdir = -3;
+                }
+                if (((ballposX - playerX) <= (racketWidth*0.6)) && ((ballposX - playerX) > (racketWidth*0.4))){
+                    if(ballXdir > 0){
+                        ballXdir = 3;
+                    }
+                    else{
+                        ballXdir = -3;
+                    }
+                    ballYdir = -4;
+                }
+                if (((ballposX - playerX) <= (racketWidth*0.8)) && ((ballposX - playerX) > (racketWidth*0.6))){
+                    if(ballXdir > 0){
+                        ballXdir = 4;
+                    }
+                    else{
+                        ballXdir = -4;
+                    }
+                    ballYdir = -3;
+                }
+                if (((ballposX - playerX) <= (racketWidth)) && ((ballposX - playerX) > (racketWidth*0.8))){
+                    if(ballXdir > 0){
+                        ballXdir = 5;
+                    }
+                    else{
+                        ballXdir = -5;
+                    }
+                    ballYdir = -1;
+                }
             }
             //logic with bricks
            A: for (int i = 0; i < map.map.length; i++){
                 for (int j = 0; j < map.map[0].length; j++){
-                    if(map.map[i][j] > 0){
+                    if(map.map[i][j].strength > 0){
                         int brickX = j * map.brickWidth + 80;
                         int brickY = i * map.brickWidth + 50;
                         int brickWidth = map.brickWidth;
@@ -110,13 +169,65 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
                         Rectangle brickRect = rect;
 
                         if (ballRect.intersects(brickRect)){
-                            map.setBrickValue(0,i,j);
-                            totalBricks--;
+                            MapElement x = map.hitBrick(i, j);
+                            if(x.strength == 0){
+                                totalBricks--;
+                                ApplyPowerup(x.powerup);
+                            }
+                            speed = 16/(double)delay;
+                            size = (double)racketWidth/100;
                             score+= 5;
-                            if(ballposX + 19 <= brickRect.x || ballposX + 1 >= brickRect.x + brickRect.width){
-                                ballXdir = - ballXdir;
-                            }else{
-                                ballYdir = -ballYdir;
+                            // ha bal felső sarok felől megy a labda
+                            if((ballXdir > 0) && (ballYdir > 0)){
+                                if(abs(brickRect.x-(ballposX+20)) < abs(brickRect.y - (ballposY+20))){
+                                    ballXdir= -ballXdir;
+                                }
+                                else if (abs(brickRect.x-(ballposX+20)) > abs(brickRect.y - (ballposY+20))) {
+                                    ballYdir = -ballYdir;
+                                }
+                                else{
+                                    ballXdir = -ballXdir;
+                                    ballYdir = -ballYdir;
+                                }
+                            }
+                            //ha bal alulról jön a labda
+                            else if((ballXdir > 0) && (ballYdir < 0)){
+                                if(abs(brickRect.x-(ballposX+20)) < abs(brickRect.y + brickHeight - ballposY)){
+                                    ballXdir= -ballXdir;
+                                }
+                                else if (abs(brickRect.x-(ballposX+20)) > abs(brickRect.y + brickHeight - ballposY)) {
+                                    ballYdir = -ballYdir;
+                                }
+                                else{
+                                    ballXdir = -ballXdir;
+                                    ballYdir = -ballYdir;
+                                }
+                            }
+                            //ha jobb alulról jön a labda
+                            else if((ballXdir < 0) && (ballYdir < 0)){
+                                if(abs(brickRect.x + brickWidth-ballposX) < abs(brickRect.y + brickHeight - ballposY)){
+                                    ballXdir= -ballXdir;
+                                }
+                                else if (abs(brickRect.x + brickWidth-ballposX) > abs(brickRect.y + brickHeight - ballposY)) {
+                                    ballYdir = -ballYdir;
+                                }
+                                else{
+                                    ballXdir = -ballXdir;
+                                    ballYdir = -ballYdir;
+                                }
+                            }
+                            // ha jobb felső sarok felől megy a labda
+                            else if((ballXdir < 0) && (ballYdir > 0)){
+                                if(abs(brickRect.x + brickWidth-ballposX) < abs(brickRect.y - ballposY+20)){
+                                    ballXdir= -ballXdir;
+                                }
+                                else if (abs(brickRect.x + brickWidth-ballposX) > abs(brickRect.y - ballposY+20)) {
+                                    ballYdir = -ballYdir;
+                                }
+                                else{
+                                    ballXdir = -ballXdir;
+                                    ballYdir = -ballYdir;
+                                }
                             }
                             break A;
                         }
@@ -136,9 +247,45 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
             if(ballposX > 670){
                 ballXdir = -ballXdir;
             }
+            if(playerX <= 3){
+                stopMove();
+                playerX = 4;
+            }
+            if(playerX >= (681-racketWidth)) {
+                stopMove();
+                playerX = (680-racketWidth);
+            }
+            playerX += playerSpeed;
         }
 
         repaint();
+    }
+
+    private void ApplyPowerup(PowerUpType powerup) {
+        switch (powerup) {
+            case None:
+                break;
+
+            case FasterBall:
+                delay /= 2;
+                timer.stop();
+                timer = new Timer(delay,this);
+                timer.start();
+                break;
+
+            case SlowerBall:
+                delay *= 2;
+                timer.stop();
+                timer = new Timer(delay,this);
+                timer.start();
+                break;
+            case SmallRacket:
+                racketWidth /= 2;
+                break;
+            case BigRacket:
+                racketWidth *= 2;
+                break;
+        }
     }
 
     @Override
@@ -148,50 +295,55 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-
+        if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+            stopMove();
+        }
+        if(e.getKeyCode() == KeyEvent.VK_LEFT) {
+            stopMove();
+        }
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_RIGHT){
-            if(playerX >= 600){
-                playerX = 600;
-            }
-            else{
-                moveRight();
-            }
+            moveRight();
         }
         if(e.getKeyCode() == KeyEvent.VK_LEFT){
-            if(playerX <= 10){
-                playerX = 10;
-            }
-            else{
-                moveLeft();
-            }
+            moveLeft();
         }
         if (e.getKeyCode() == KeyEvent.VK_ENTER){
             if (!play) {
                 play = true;
-                ballposX = 120;
+                ballposX = 240;
                 ballposY = 350;
-                ballXdir = -1;
-                ballYdir = -2;
+                ballXdir = -3;
+                ballYdir = -4;
                 playerX = 310;
                 score = 0;
                 totalBricks = 21;
+                delay = 16;
+                racketWidth = 100;
                 map = new MapGenerator(3, 7);
                 repaint();
             }
         }
     }
+    public void stopMove(){
+        play = true;
+        playerSpeed = 0;
+    }
     public void moveRight(){
         play = true;
-        playerX += 20;
+        if(playerX < (680-racketWidth)) {
+            playerSpeed = 10;
+        }
     }
 
     public void moveLeft(){
         play = true;
-        playerX -= 20;
+        if(playerX > 4) {
+            playerSpeed = -10;
+        }
     }
 
 
