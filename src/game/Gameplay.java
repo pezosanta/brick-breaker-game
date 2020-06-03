@@ -264,16 +264,12 @@ public class Gameplay implements KeyListener, ActionListener {
 
             case FasterBall:
                 delay /= 2;
-                timer.stop();
-                timer = new Timer(delay, this);
-                timer.start();
+                timer.setDelay(delay);
                 break;
 
             case SlowerBall:
                 delay *= 2;
-                timer.stop();
-                timer = new Timer(delay, this);
-                timer.start();
+                timer.setDelay(delay);
                 break;
 
             case SmallRacket: {
