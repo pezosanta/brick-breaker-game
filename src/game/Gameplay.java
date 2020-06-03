@@ -138,7 +138,16 @@ public class Gameplay implements KeyListener, ActionListener {
         ballpos.y += map.ball.getSpeedY();
         map.ball.setPosition(ballpos);
 
-        // TODO: Move paddle
+        Point paddlepos = map.paddle.getPosition();
+        paddlepos.x += map.paddle.getSpeedX();
+        if (paddlepos.x > (panelWidth - paddleWidth)) {
+            stopMove();
+            paddlepos.x = panelWidth - paddleWidth;
+        } else if (paddlepos.x < wallWidth) {
+            stopMove();
+            paddlepos.x = wallWidth;
+        }
+        map.paddle.setPosition(paddlepos);
     }
 
     private boolean handleCollisions() {
@@ -179,31 +188,22 @@ public class Gameplay implements KeyListener, ActionListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        /*switch (e.getKeyCode()) {
-            case KeyEvent.VK_RIGHT: {
-                map.paddle.setSpeedX(map.paddle.getSpeedX() + 20);
-            }
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_RIGHT:
             case KeyEvent.VK_LEFT: {
-                map.paddle.setSpeedX(map.paddle.getSpeedX() - 20);
+                stopMove();
+                break;
             }
-        }*/
+        }
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            if (map.paddle.getPosition().x >= 600){
-                map.paddle.setPosition(new Point(600, map.paddle.getPosition().y));
-            } else {
-                moveRight();
-            }
+            moveRight();
         }
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            if (map.paddle.getPosition().x <= 10){
-                map.paddle.setPosition(new Point(10, map.paddle.getPosition().y));
-            } else {
-                moveLeft();
-            }
+            moveLeft();
         }
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             if (!play) {
@@ -227,18 +227,23 @@ public class Gameplay implements KeyListener, ActionListener {
         }
     }
 
-    public void moveRight(){
-        Point paddlepos = map.paddle.getPosition();
-        paddlepos.x += 20;
-        map.paddle.setPosition(paddlepos);
+    public void stopMove(){
         play = true;
+        map.paddle.setSpeedX(0);
+    }
+
+    public void moveRight(){
+        play = true;
+        if (map.paddle.getPosition().x < (panelWidth - paddleWidth)) {
+            map.paddle.setSpeedX(10);
+        }
     }
 
     public void moveLeft(){
-        Point paddlepos = map.paddle.getPosition();
-        paddlepos.x -= 20;
-        map.paddle.setPosition(paddlepos);
         play = true;
+        if (map.paddle.getPosition().x > (wallWidth)) {
+            map.paddle.setSpeedX(-10);
+        }
     }
 
 }

@@ -8,8 +8,6 @@ public class Paddle extends RectGameObject {
     }
 
     public void setSpeedX(int speedX) {
-        if (speedX < 0)
-            throw new IllegalArgumentException("Speed must be non-negative!");
         this.speedX = speedX;
     }
 
