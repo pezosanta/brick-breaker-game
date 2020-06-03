@@ -1,6 +1,6 @@
 package game;
 
-import game.gameObjects.Brick;
+import game.gameObjects.PowerUpType;
 import game.gameObjects.Wall;
 import gui.MenuListener;
 import gui.menuHandler;
@@ -13,6 +13,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Gameplay implements KeyListener, ActionListener {
     final int panelWidth = 700;
@@ -31,6 +32,8 @@ public class Gameplay implements KeyListener, ActionListener {
 
     private GameMap baseMap;
     private GameMap map;
+
+    private Random random;
 
     private java.util.List<MenuListener> listeners = new ArrayList<MenuListener>();
     public void addListener(MenuListener listenerToAdd)
@@ -56,6 +59,8 @@ public class Gameplay implements KeyListener, ActionListener {
         map.ball.setPosition(new Point(120, 350));
         map.ball.setSpeedX(-3);
         map.ball.setSpeedY(-4);
+
+        random = new Random();
     }
 
     public Gameplay(InputStream in){
@@ -173,6 +178,12 @@ public class Gameplay implements KeyListener, ActionListener {
                     map.ball.handleCollisionWith(map.bricks[i][j]);
                     map.bricks[i][j].decreaseHealth();
                     score += 5;
+                    if (map.bricks[i][j].getHealth() == 0) {
+                        if (random.nextFloat() > 0.7) {
+                            int powUpIndex = random.nextInt(PowerUpType.values().length);
+                            applyPowerUp(PowerUpType.values()[powUpIndex]);
+                        }
+                    }
                     break A;
                 }
             }
@@ -244,6 +255,41 @@ public class Gameplay implements KeyListener, ActionListener {
         if (map.paddle.getPosition().x > (wallWidth)) {
             map.paddle.setSpeedX(-10);
         }
+    }
+
+    private void applyPowerUp(PowerUpType powerup) {
+        switch (powerup) {
+            case None:
+                break;
+
+            case FasterBall:
+                delay /= 2;
+                timer.stop();
+                timer = new Timer(delay, this);
+                timer.start();
+                break;
+
+            case SlowerBall:
+                delay *= 2;
+                timer.stop();
+                timer = new Timer(delay, this);
+                timer.start();
+                break;
+
+            case SmallRacket: {
+                Rectangle rect = map.paddle.getRect();
+                rect.width /= 2;
+                map.paddle.setRect(rect.x, rect.y, rect.width, rect.height);
+                break;
+            }
+            case BigRacket: {
+                Rectangle rect = map.paddle.getRect();
+                rect.width *= 2;
+                map.paddle.setRect(rect.x, rect.y, rect.width, rect.height);
+                break;
+            }
+        }
+        System.out.println("Powerup " + powerup.toString() + " applied.");
     }
 
 }
