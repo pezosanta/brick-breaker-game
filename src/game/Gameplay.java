@@ -27,7 +27,7 @@ public class Gameplay implements KeyListener, ActionListener {
     private int score = 0;
 
     private Timer timer;
-    private int delay = 8;
+    private int delay = 16;
 
     private GameMap baseMap;
     private GameMap map;
@@ -54,8 +54,8 @@ public class Gameplay implements KeyListener, ActionListener {
         //ball
         map.ball.setRadius(ballRadius);
         map.ball.setPosition(new Point(120, 350));
-        map.ball.setSpeedX(-1);
-        map.ball.setSpeedY(-2);
+        map.ball.setSpeedX(-3);
+        map.ball.setSpeedY(-4);
     }
 
     public Gameplay(InputStream in){
@@ -153,7 +153,7 @@ public class Gameplay implements KeyListener, ActionListener {
     private boolean handleCollisions() {
         // Paddle
         if (map.ball.collidesWith(map.paddle)) {
-            map.ball.handleCollisionWith(map.paddle);
+            map.ball.handleCollisionWithPaddle(map.paddle);
         }
 
         // Walls
