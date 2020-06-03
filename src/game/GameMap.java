@@ -3,7 +3,7 @@ package game;
 import game.gameObjects.*;
 
 import java.awt.*;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -12,42 +12,70 @@ public class GameMap {
     public static final int ROWS = 4;
     public static final int COLS = 8;
 
-    public final Brick[][] bricks;
-    public final Wall[] walls;
-    public final Ball ball;
-    public final Paddle paddle;
+    static final int brickWidth = 560/COLS;
+    static final int brickHeight = 160/ROWS;
+    static final int panelWidth = 700;
+    static final int panelHeight = 600;
+    static final int wallWidth = 3;
+    static final int paddleWidth = 100;
+    static final int paddleHeight = 8;
+    static final int ballRadius = 20;
 
-    public int brickWidth;
-    public int brickHeight;
+    Brick[][] bricks;
+    Wall[] walls;
+    Ball ball;
+    Paddle paddle;
+
+    final int[][] startingHealth;
 
     public GameMap() {
-        brickWidth = 560/COLS;
-        brickHeight = 160/ROWS;
+        this(null);
+    }
 
+    public GameMap(int[][] healths) {
+        if (healths == null) {
+            // Create array of ones
+            healths = new int[ROWS][COLS];
+            for (int[] health : healths) {
+                Arrays.fill(health, 1);
+            }
+        }
+        startingHealth = healths;
+
+        this.reset();
+    }
+
+    public void reset() {
         bricks = new Brick[ROWS][COLS];
         for (int i=0; i<bricks.length; i++) {
             for (int j=0; j< bricks[i].length; j++) {
-                bricks[i][j] = new Brick(j * brickWidth + 80, i * brickHeight + 50, brickWidth*9/10, brickHeight*9/10, 1);
+                bricks[i][j] = new Brick(j * brickWidth + 80, i * brickHeight + 50,
+                        brickWidth*9/10, brickHeight*9/10, startingHealth[i][j]);
                 bricks[i][j].setColor(Color.GREEN);
             }
         }
 
+        //borders
         walls = new Wall[4];
-        for (int i=0; i<walls.length; i++) {
-            walls[i] = new Wall(0,0,0,0);
-        }
+        walls[0] = new Wall(0, 0, wallWidth, panelHeight);
+        walls[1] = new Wall(0, 0, panelWidth, wallWidth);
+        walls[2] = new Wall(panelWidth-wallWidth, 0, wallWidth, panelHeight);
+        walls[3] = new Wall(0, panelHeight-wallWidth, panelWidth, wallWidth);
         walls[walls.length - 1].setColor(Color.RED);
 
-        ball = new Ball(0, 0, 1);
+        //ball
+        ball = new Ball(120, 350, ballRadius);
+        ball.setSpeedX(-3);
+        ball.setSpeedY(-4);
         ball.setColor(Color.MAGENTA);
 
-        paddle = new Paddle(0, 0, 0, 0);
+        //the paddle
+        paddle = new Paddle(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
         paddle.setColor(Color.BLUE);
     }
 
-    public ArrayList<GameObject> getAllGameObjects() {
-        ArrayList<GameObject> objects = new ArrayList<GameObject>();
-        objects.addAll(Arrays.asList(walls));
+    ArrayList<GameObject> getAllGameObjects() {
+        ArrayList<GameObject> objects = new ArrayList<>(Arrays.asList(walls));
         for (Brick[] brickRow : bricks)
             objects.addAll(Arrays.asList(brickRow));
         objects.add(ball);

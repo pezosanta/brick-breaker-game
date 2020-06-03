@@ -45,10 +45,10 @@ public class BrickBreakerGame {
 
     public static void main(String[] args) {
         BrickBreakerGame game = new BrickBreakerGame();
-        ArrayList<String> maps = game.getAvailableMaps();
-        System.out.println(maps.size());
-        game.startGame(maps.get(1));
+        //ArrayList<String> maps = game.getAvailableMaps();
+        //System.out.println(maps.size());
+        //game.startGame(maps.get(1));
 
-        //game.showGUI();
+        game.showGUI();
     }
 }
