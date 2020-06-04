@@ -8,17 +8,17 @@ import java.awt.event.MouseEvent;
 
 public class multiplayerMenu extends Menu
 {
-    private enum BUTTONSTATE {HEROVSVILLAIN, COOPERATION, BACK, OTHER};
+    private enum BUTTONSTATE {SERVERMODE, CLIENTMODE, BACK, OTHER};
 
     private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
     private BUTTONSTATE buttonState                 = BUTTONSTATE.OTHER;
     private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]
-            { BUTTONSTATE.HEROVSVILLAIN, BUTTONSTATE.COOPERATION, BUTTONSTATE.BACK, BUTTONSTATE.OTHER };
+            { BUTTONSTATE.SERVERMODE, BUTTONSTATE.CLIENTMODE, BUTTONSTATE.BACK, BUTTONSTATE.OTHER };
 
     private final int[] rectangleYArray             = new int[]{ 120, 175, 230 };
 
-    private final Rectangle heroVsVillainButton     = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle cooperationButton       = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle serverModeButton = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle clientModeButton = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
     private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
 
     public multiplayerMenu(){}
@@ -31,24 +31,24 @@ public class multiplayerMenu extends Menu
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setColor(super.inactiveColor);
-        g2d.fill(heroVsVillainButton);
-        g2d.fill(cooperationButton);
+        g2d.fill(serverModeButton);
+        g2d.fill(clientModeButton);
         g2d.fill(backButton);
 
         switch(buttonState)
         {
-            case HEROVSVILLAIN:
+            case SERVERMODE:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(heroVsVillainButton);
+                g2d.fill(serverModeButton);
                 break;
 
-            case COOPERATION:
+            case CLIENTMODE:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(cooperationButton);
+                g2d.fill(clientModeButton);
                 break;
 
             case BACK:
@@ -60,16 +60,16 @@ public class multiplayerMenu extends Menu
 
             default:
                 g2d.setColor(super.inactiveColor);
-                g2d.fill(heroVsVillainButton);
-                g2d.fill(cooperationButton);
+                g2d.fill(serverModeButton);
+                g2d.fill(clientModeButton);
                 g2d.fill(backButton);
         }
 
         Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
         g.setColor(super.fontColor);
-        g.drawString("Hero vs Villain", heroVsVillainButton.x + 46, heroVsVillainButton.y + 35);
-        g.drawString("CO-OP", cooperationButton.x + 98, cooperationButton.y + 35);
+        g.drawString("Server mode", serverModeButton.x + 56, serverModeButton.y + 35);
+        g.drawString("Client mode", clientModeButton.x + 60, clientModeButton.y + 35);
         g.drawString("Back", backButton.x + 112, backButton.y + 35);
 
         clickedState = CLICKEDSTATE.OTHER;
@@ -130,14 +130,14 @@ public class multiplayerMenu extends Menu
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.HEROVSVILLAIN);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SERVERMODE);
                 }
             }
             else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.COOPERATION);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.CLIENTMODE);
                 }
             }
             else if ((rectangleYArray[2] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[2])
