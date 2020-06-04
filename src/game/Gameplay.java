@@ -42,12 +42,26 @@ public class Gameplay implements KeyListener, ActionListener {
         timer.start();
     }
 
-    public Gameplay(){
+    public Gameplay() {
         map = new GameMap();
         random = new Random();
 
         timer = new Timer(delay,this);
         timer.start();
+    }
+
+    public static Gameplay startFromCheckpoint() {
+        Gameplay gameplay = new Gameplay();
+        GameMap gameMap = GameMap.loadCheckpoint();
+        if (gameMap != null) {
+            gameplay.map = gameMap;
+        }
+        return gameplay;
+    }
+
+    public void pause() {
+        map.createCheckpoint();
+        timer.stop();
     }
 
     public void render(Graphics g){
@@ -202,7 +216,7 @@ public class Gameplay implements KeyListener, ActionListener {
         {
             for (MenuListener hl : listeners)
             {
-                timer.stop();
+                pause();
                 hl.menuSwitchHandler(menuHandler.MENUSTATE.PAUSE);
             }
         }

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
-public class GameMap {
+public class GameMap implements Serializable {
     public static final int ROWS = 4;
     public static final int COLS = 8;
 
@@ -72,6 +72,46 @@ public class GameMap {
         //the paddle
         paddle = new Paddle(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
         paddle.setColor(Color.BLUE);
+    }
+
+    public void createCheckpoint() {
+        // TODO: create checkpoint from serialized object
+        //Saving of object in a file
+        try {
+            FileOutputStream file = new FileOutputStream(".gamemap_ckpt.ser");
+            ObjectOutputStream out = new ObjectOutputStream(file);
+
+            // Method for serialization of object
+            out.writeObject(this);
+
+            out.close();
+            file.close();
+
+            System.out.println("Object has been serialized");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static GameMap loadCheckpoint() {
+        GameMap gamemap = null;
+        // Deserialization
+        try {
+            // Reading the object from a file
+            FileInputStream file = new FileInputStream(".gamemap_ckpt.ser");
+            ObjectInputStream in = new ObjectInputStream(file);
+
+            // Method for deserialization of object
+            gamemap = (GameMap)in.readObject();
+
+            in.close();
+            file.close();
+
+            System.out.println("Object has been deserialized ");
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return gamemap;
     }
 
     ArrayList<GameObject> getAllGameObjects() {
