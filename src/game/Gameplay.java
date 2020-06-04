@@ -4,6 +4,7 @@ import game.gameObjects.PowerUpType;
 import game.gameObjects.Wall;
 import gui.MenuListener;
 import gui.menuHandler;
+import networking.GameStateMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -19,6 +20,11 @@ public class Gameplay implements KeyListener, ActionListener {
 
     private boolean play = false;
     private boolean firstRun = true;
+    private boolean isMultiplayer = false;
+    private boolean isServer = false;
+    private ObjectInputStream inStream;
+    private ObjectOutputStream outStream;
+
     private int score = 0;
 
     private Timer timer;
@@ -35,7 +41,11 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     public Gameplay(InputStream in){
-        map = GameMap.loadMapFromCSV(in);
+        if (in != null) {
+            map = GameMap.loadMapFromCSV(in);
+        } else {
+            map = new GameMap();
+        }
         random = new Random();
 
         timer = new Timer(delay,this);
@@ -43,11 +53,47 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     public Gameplay() {
-        map = new GameMap();
-        random = new Random();
+        this(null);
+    }
 
-        timer = new Timer(delay,this);
-        timer.start();
+    public Gameplay(boolean isServer, ObjectInputStream inStream, ObjectOutputStream outStream) {
+        this();
+        this.isMultiplayer = true;
+        this.isServer = isServer;
+        this.inStream = inStream;
+        this.outStream = outStream;
+
+        if (isServer) {
+            try {
+                outStream.writeObject(map);
+
+                inStream.wait(500); // Might be bug
+                GameStateMessage msg = (GameStateMessage) inStream.readObject();
+                if (msg != GameStateMessage.OK) {
+                    System.out.println(msg.toString());
+                    throw new RuntimeException("Client failed to respond properly!");
+                }
+            } catch (IOException | InterruptedException | ClassNotFoundException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+
+        } else {
+            GameMap gameMap = null;
+            try {
+                gameMap = (GameMap) inStream.readObject();
+                outStream.writeObject(GameStateMessage.OK);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            if (gameMap != null) {
+                map = gameMap;
+            } else {
+                throw new RuntimeException("Could not receive GameMap object from server! Aborting...");
+            }
+
+        }
     }
 
     public static Gameplay startFromCheckpoint() {
@@ -59,9 +105,19 @@ public class Gameplay implements KeyListener, ActionListener {
         return gameplay;
     }
 
-    public void pause() {
-        map.createCheckpoint();
+    public void stop() {
         timer.stop();
+        if (!isMultiplayer) {
+            map.createCheckpoint();
+        } else {
+            try {
+                outStream.writeObject(GameStateMessage.EXITED);
+                outStream.close();
+                inStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void render(Graphics g){
@@ -95,6 +151,7 @@ public class Gameplay implements KeyListener, ActionListener {
 
         g.dispose();
     }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (play) {
@@ -104,10 +161,6 @@ public class Gameplay implements KeyListener, ActionListener {
         for (MenuListener hl : listeners)
         {
             hl.gamePaintHandler();
-        }
-
-        if (play) {
-            //timer.start();
         }
     }
 
@@ -216,7 +269,7 @@ public class Gameplay implements KeyListener, ActionListener {
         {
             for (MenuListener hl : listeners)
             {
-                pause();
+                stop();
                 hl.menuSwitchHandler(menuHandler.MENUSTATE.PAUSE);
             }
         }
