@@ -20,6 +20,10 @@ public class Gameplay implements KeyListener, ActionListener {
     private boolean play = false;
     private boolean firstRun = true;
     private int score = 0;
+    private int paddleSpeed = 8;
+    private int ballSpeedCounter = 0;
+    private int paddleSizeCounter = 0;
+    private int maxPowerUpLevel = 3;
 
     private Timer timer;
     private int delay = 16;
@@ -129,9 +133,9 @@ public class Gameplay implements KeyListener, ActionListener {
 
         Point paddlepos = map.paddle.getPosition();
         paddlepos.x += map.paddle.getSpeedX();
-        if (paddlepos.x > (map.panelWidth - map.paddleWidth)) {
+        if (paddlepos.x > (map.panelWidth - map.paddle.getRect().width-map.wallWidth)) {
             stopMove();
-            paddlepos.x = map.panelWidth - map.paddleWidth;
+            paddlepos.x = map.panelWidth - map.paddle.getRect().width-map.wallWidth;
         } else if (paddlepos.x < map.wallWidth) {
             stopMove();
             paddlepos.x = map.wallWidth;
@@ -223,21 +227,27 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     public void stopMove(){
-        play = true;
+        if (firstRun == true){
+            play = true;
+        }
         map.paddle.setSpeedX(0);
     }
 
     public void moveRight(){
-        play = true;
+        if (firstRun == true){
+            play = true;
+        }
         if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
-            map.paddle.setSpeedX(10);
+            map.paddle.setSpeedX(paddleSpeed);
         }
     }
 
     public void moveLeft(){
-        play = true;
+        if (firstRun == true){
+            play = true;
+        }
         if (map.paddle.getPosition().x > (map.wallWidth)) {
-            map.paddle.setSpeedX(-10);
+            map.paddle.setSpeedX(-paddleSpeed);
         }
     }
 
@@ -247,25 +257,39 @@ public class Gameplay implements KeyListener, ActionListener {
                 break;
 
             case FasterBall:
-                delay /= 2;
-                timer.setDelay(delay);
+                if (ballSpeedCounter < maxPowerUpLevel) {
+                    delay /= 2;
+                    timer.setDelay(delay);
+                    paddleSpeed /= 2;
+                    ballSpeedCounter++;
+                }
                 break;
 
             case SlowerBall:
-                delay *= 2;
-                timer.setDelay(delay);
+                if (ballSpeedCounter > -maxPowerUpLevel) {
+                    delay *= 2;
+                    timer.setDelay(delay);
+                    paddleSpeed *= 2;
+                    ballSpeedCounter--;
+                }
                 break;
 
             case SmallRacket: {
-                Rectangle rect = map.paddle.getRect();
-                rect.width /= 2;
-                map.paddle.setRect(rect.x, rect.y, rect.width, rect.height);
+                if(paddleSizeCounter > -maxPowerUpLevel) {
+                    Rectangle rect = map.paddle.getRect();
+                    rect.width /= 2;
+                    map.paddle.setRect(rect.x, rect.y, rect.width, rect.height);
+                    paddleSizeCounter--;
+                }
                 break;
             }
             case BigRacket: {
-                Rectangle rect = map.paddle.getRect();
-                rect.width *= 2;
-                map.paddle.setRect(rect.x, rect.y, rect.width, rect.height);
+                if(paddleSizeCounter < maxPowerUpLevel) {
+                    Rectangle rect = map.paddle.getRect();
+                    rect.width *= 2;
+                    map.paddle.setRect(rect.x, rect.y, rect.width, rect.height);
+                    paddleSizeCounter++;
+                }
                 break;
             }
         }

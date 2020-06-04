@@ -6,6 +6,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.Scanner;
 
 public class GameMap implements Serializable {
@@ -33,11 +34,24 @@ public class GameMap implements Serializable {
     }
 
     public GameMap(int[][] healths) {
+        Random r = new Random();
         if (healths == null) {
             // Create array of ones
             healths = new int[ROWS][COLS];
-            for (int[] health : healths) {
-                Arrays.fill(health, 1);
+
+            for (int i = 0 ; i < ROWS; i++){
+                for (int j = 0; j < COLS; j++){
+                    float strength = r.nextFloat();
+                    if (strength < 0.5){
+                        healths[i][j] = 1;
+                    }
+                    else if (strength < 0.8333){
+                        healths[i][j] = 2;
+                    }
+                    else{
+                        healths[i][j] = 3;
+                    }
+                }
             }
         }
         startingHealth = healths;
@@ -51,7 +65,15 @@ public class GameMap implements Serializable {
             for (int j=0; j< bricks[i].length; j++) {
                 bricks[i][j] = new Brick(j * brickWidth + 80, i * brickHeight + 50,
                         brickWidth*9/10, brickHeight*9/10, startingHealth[i][j]);
-                bricks[i][j].setColor(Color.GREEN);
+                if(bricks[i][j].getHealth() == 1) {
+                    bricks[i][j].setColor(Color.GREEN);
+                }
+                if(bricks[i][j].getHealth() == 2) {
+                    bricks[i][j].setColor(Color.BLUE);
+                }
+                if(bricks[i][j].getHealth() == 3) {
+                    bricks[i][j].setColor(Color.RED);
+                }
             }
         }
 
