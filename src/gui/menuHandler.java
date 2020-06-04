@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class menuHandler extends JPanel implements MenuListener
 {
-    public static enum MENUSTATE { MAIN, SINGLEPLAYER, MULTIPLAYER, SETTINGS, HELP, QUIT, HEROVSVILLAIN, COOPERATION, PAUSE };
+    public static enum MENUSTATE { MAIN, SINGLEPLAYER, MULTIPLAYER, SETTINGS, HELP, QUIT, SERVERMODE, CLIENTMODE, PAUSE };
     private MENUSTATE menuState = MENUSTATE.MAIN;
 
     private Menu currentMenu;
