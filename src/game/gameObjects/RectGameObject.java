@@ -36,7 +36,7 @@ public class RectGameObject extends GameObject {
             return obj.collidesWith(this);
         } else if (obj instanceof RectGameObject) {
             RectGameObject rectObj = (RectGameObject) obj;
-            return rect.intersects(rectObj.rect);
+            return this.rect.intersects(rectObj.rect);
         }
         return true;
     }

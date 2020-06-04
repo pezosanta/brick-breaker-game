@@ -39,27 +39,32 @@ public class CircularGameObject extends GameObject {
             RectGameObject rectObj = (RectGameObject) obj;
             Rectangle rect = rectObj.getRect();
 
-            int distanceX = Math.abs(this.position.x - (rect.x + rect.width/2));
-            int distanceY = Math.abs(this.position.y - (rect.y + rect.height/2));
+            // source: http://www.jeffreythompson.org/collision-detection/circle-rect.php
+            // temporary variables to set edges for testing
+            float testX = this.position.x;
+            float testY = this.position.y;
 
-            if (distanceX > (rect.width/2 + this.radius)) {
-                return false;
+            // which edge is closest?
+            if (this.position.x < rect.x) {
+                testX = rect.x;      // test left edge
             }
-            if (distanceY > (rect.height/2 + this.radius)) {
-                return false;
+            else if (this.position.x > rect.x+rect.width) {
+                testX = rect.x+rect.width;   // right edge
+            }
+            if (this.position.y < rect.y) {
+                testY = rect.y;      // top edge
+            }
+            else if (this.position.y > rect.y+rect.height) {
+                testY = rect.y+rect.height;   // bottom edge
             }
 
-            if (distanceX <= (rect.width/2)) {
-                return true;
-            }
-            if (distanceY <= (rect.height/2)) {
-                return true;
-            }
+            // get distance from closest edges
+            float distX = this.position.x-testX;
+            float distY = this.position.y-testY;
+            float distance = (float) Math.sqrt( (distX*distX) + (distY*distY) );
 
-            double cornerDistance_sq = Math.pow((distanceX - rect.width/2.0), 2) +
-                    Math.pow(distanceY - rect.height/2.0, 2);
-
-            return (cornerDistance_sq <= (this.radius^2));
+            // if the distance is less than the radius, collision!
+            return distance <= this.radius;
         }
         return true;
     }

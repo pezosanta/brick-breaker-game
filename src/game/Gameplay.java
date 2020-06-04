@@ -16,12 +16,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Gameplay implements KeyListener, ActionListener {
-    final int panelWidth = 700;
-    final int panelHeight = 600;
-    final int wallWidth = 3;
-    final int paddleWidth = 100;
-    final int paddleHeight = 8;
-    final int ballRadius = 20;
 
     private boolean play = false;
     private boolean firstRun = true;
@@ -30,7 +24,6 @@ public class Gameplay implements KeyListener, ActionListener {
     private Timer timer;
     private int delay = 16;
 
-    private GameMap baseMap;
     private GameMap map;
 
     private Random random;
@@ -41,48 +34,40 @@ public class Gameplay implements KeyListener, ActionListener {
         listeners.add(listenerToAdd);
     }
 
-    private void reset() {
-
-        map = baseMap;
-
-        //borders
-        map.walls[0].setRect(0, 0, wallWidth, panelHeight);
-        map.walls[1].setRect(0, 0, panelWidth, wallWidth);
-        map.walls[2].setRect(panelWidth-wallWidth, 0, wallWidth, panelHeight);
-        map.walls[3].setRect(0, panelHeight-wallWidth, panelWidth, wallWidth);
-
-        //the paddle
-        map.paddle.setRect(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
-
-        //ball
-        map.ball.setRadius(ballRadius);
-        map.ball.setPosition(new Point(120, 350));
-        map.ball.setSpeedX(-3);
-        map.ball.setSpeedY(-4);
-
-        random = new Random();
-    }
-
     public Gameplay(InputStream in){
-        baseMap = GameMap.loadMapFromCSV(in);
-        reset();
+        map = GameMap.loadMapFromCSV(in);
+        random = new Random();
 
         timer = new Timer(delay,this);
         timer.start();
     }
 
-    public Gameplay(){
-        baseMap = new GameMap();
-        reset();
+    public Gameplay() {
+        map = new GameMap();
+        random = new Random();
 
         timer = new Timer(delay,this);
         timer.start();
+    }
+
+    public static Gameplay startFromCheckpoint() {
+        Gameplay gameplay = new Gameplay();
+        GameMap gameMap = GameMap.loadCheckpoint();
+        if (gameMap != null) {
+            gameplay.map = gameMap;
+        }
+        return gameplay;
+    }
+
+    public void pause() {
+        map.createCheckpoint();
+        timer.stop();
     }
 
     public void render(Graphics g){
         //background
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, panelWidth, panelHeight);
+        g.fillRect(0, 0, map.panelWidth, map.panelHeight);
 
         //drawing map
         map.draw((Graphics2D) g);
@@ -90,7 +75,7 @@ public class Gameplay implements KeyListener, ActionListener {
         //scores
         g.setColor(Color.white);
         g.setFont(new Font("serif",Font.BOLD,25));
-        g.drawString(""+score,panelWidth*4/5,25+2*wallWidth);
+        g.drawString(""+score,map.panelWidth*4/5,25+2*map.wallWidth);
 
         if (!play && map.getAvailableBricks() <= 0) {
             g.setColor(Color.RED);
@@ -127,12 +112,11 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     private void step() {
+        moveBallAndPaddle();
         boolean hitBottomWall = handleCollisions();
         if (hitBottomWall || map.getAvailableBricks() == 0) {
             play = false;
             firstRun = false;
-        } else {
-            moveBallAndPaddle();
         }
     }
 
@@ -145,12 +129,12 @@ public class Gameplay implements KeyListener, ActionListener {
 
         Point paddlepos = map.paddle.getPosition();
         paddlepos.x += map.paddle.getSpeedX();
-        if (paddlepos.x > (panelWidth - paddleWidth)) {
+        if (paddlepos.x > (map.panelWidth - map.paddleWidth)) {
             stopMove();
-            paddlepos.x = panelWidth - paddleWidth;
-        } else if (paddlepos.x < wallWidth) {
+            paddlepos.x = map.panelWidth - map.paddleWidth;
+        } else if (paddlepos.x < map.wallWidth) {
             stopMove();
-            paddlepos.x = wallWidth;
+            paddlepos.x = map.wallWidth;
         }
         map.paddle.setPosition(paddlepos);
     }
@@ -218,7 +202,7 @@ public class Gameplay implements KeyListener, ActionListener {
         }
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             if (!play) {
-                reset();
+                map.reset();
                 play = true;
                 score = 0;
 
@@ -232,7 +216,7 @@ public class Gameplay implements KeyListener, ActionListener {
         {
             for (MenuListener hl : listeners)
             {
-                timer.stop();
+                pause();
                 hl.menuSwitchHandler(menuHandler.MENUSTATE.PAUSE);
             }
         }
@@ -245,14 +229,14 @@ public class Gameplay implements KeyListener, ActionListener {
 
     public void moveRight(){
         play = true;
-        if (map.paddle.getPosition().x < (panelWidth - paddleWidth)) {
+        if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
             map.paddle.setSpeedX(10);
         }
     }
 
     public void moveLeft(){
         play = true;
-        if (map.paddle.getPosition().x > (wallWidth)) {
+        if (map.paddle.getPosition().x > (map.wallWidth)) {
             map.paddle.setSpeedX(-10);
         }
     }
@@ -264,16 +248,12 @@ public class Gameplay implements KeyListener, ActionListener {
 
             case FasterBall:
                 delay /= 2;
-                timer.stop();
-                timer = new Timer(delay, this);
-                timer.start();
+                timer.setDelay(delay);
                 break;
 
             case SlowerBall:
                 delay *= 2;
-                timer.stop();
-                timer = new Timer(delay, this);
-                timer.start();
+                timer.setDelay(delay);
                 break;
 
             case SmallRacket: {
