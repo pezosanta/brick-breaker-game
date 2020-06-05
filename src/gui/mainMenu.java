@@ -88,10 +88,10 @@ public class mainMenu extends Menu
         Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
         g.setColor(super.fontColor);
-        g.drawString("Single player", singlePlayerButton.x + 54, singlePlayerButton.y + 35);
-        g.drawString("Multiplayer", multiplayerButton.x + 70, multiplayerButton.y + 35);
-        g.drawString("High-scores", highScoreButton.x + 65, highScoreButton.y + 35);
-        g.drawString("About", aboutButton.x + 108, aboutButton.y + 35);
+        g.drawString("Single player", singlePlayerButton.x + 55, singlePlayerButton.y + 35);
+        g.drawString("Multiplayer", multiplayerButton.x + 69, multiplayerButton.y + 35);
+        g.drawString("High-scores", highScoreButton.x + 63, highScoreButton.y + 35);
+        g.drawString("About", aboutButton.x + 106, aboutButton.y + 35);
         g.drawString("Quit", quitButton.x + 118, quitButton.y + 35);
 
         clickedState = CLICKEDSTATE.OTHER;
