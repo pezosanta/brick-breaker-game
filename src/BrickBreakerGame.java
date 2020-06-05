@@ -1,8 +1,7 @@
-import game.Gameplay;
+import game.GameServer;
 import gui.GUI;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ public class BrickBreakerGame {
         InputStream fileStream = classloader.getResourceAsStream(filename);
 
         JFrame obj = new JFrame();
-        Gameplay gamePlay = new Gameplay(fileStream);
+        GameServer gamePlay = new GameServer(fileStream);
         //gamePlay.setPreferredSize(new Dimension(700, 600));
         //obj.add(gamePlay);
         obj.pack();

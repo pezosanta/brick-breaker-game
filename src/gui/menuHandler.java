@@ -1,6 +1,7 @@
 package gui;
 
-import game.Gameplay;
+import game.GameClient;
+import game.GameServer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +12,8 @@ public class menuHandler extends JPanel implements MenuListener
     private MENUSTATE menuState = MENUSTATE.MAIN;
 
     private Menu currentMenu;
-    private Gameplay game;
+    private GameServer gameServer;
+    private GameClient gameClient;
 
     public menuHandler()
     {
@@ -31,7 +33,7 @@ public class menuHandler extends JPanel implements MenuListener
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        if (menuState == MENUSTATE.SINGLEPLAYER) { game.render(g); }
+        if (menuState == MENUSTATE.SINGLEPLAYER) { gameClient.render(g); }
         else { currentMenu.render(g); }
     }
 
@@ -57,7 +59,9 @@ public class menuHandler extends JPanel implements MenuListener
 
                 this.removeMouseListener(currentMenu);
                 this.removeMouseMotionListener(currentMenu);
-                this.removeKeyListener(game);
+                this.removeKeyListener(gameClient);
+                if (gameServer != null) gameServer.stopServer();
+                if (gameClient != null) gameClient.finalizeClient();
 
                 currentMenu = new mainMenu();
                 currentMenu.addListener(this);
@@ -73,13 +77,22 @@ public class menuHandler extends JPanel implements MenuListener
 
                 this.removeMouseListener(currentMenu);
                 this.removeMouseMotionListener(currentMenu);
-                this.removeKeyListener(game);
+                this.removeKeyListener(gameClient);
+                if (gameServer != null) gameServer.stopServer();
+                if (gameClient != null) gameClient.finalizeClient();
 
                 //game = new Gameplay();
-                game = Gameplay.startFromCheckpoint();
-                game.addListener(this);
+                gameServer = GameServer.startFromCheckpoint();
+                gameClient = gameServer.createLocalClient();
+                gameClient.addListener(this);
+                gameServer.sendTestMsg();
+                gameClient.sendTestMsg();
+                System.out.println(gameClient.getTestMsg());
+                System.out.println(gameServer.getTestMsg());
+                System.out.println("Ennyi volt?");
+                gameServer.startServer();
 
-                this.addKeyListener(game);
+                this.addKeyListener(gameClient);
 
                 this.setFocusable(true);
                 this.requestFocusInWindow();
@@ -95,7 +108,9 @@ public class menuHandler extends JPanel implements MenuListener
 
                 this.removeMouseListener(currentMenu);
                 this.removeMouseMotionListener(currentMenu);
-                this.removeKeyListener(game);
+                this.removeKeyListener(gameClient);
+                if (gameServer != null) gameServer.stopServer();
+                if (gameClient != null) gameClient.finalizeClient();
 
                 currentMenu = new multiplayerMenu();
                 currentMenu.addListener(this);
@@ -111,7 +126,9 @@ public class menuHandler extends JPanel implements MenuListener
 
                 this.removeMouseListener(currentMenu);
                 this.removeMouseMotionListener(currentMenu);
-                this.removeKeyListener(game);
+                this.removeKeyListener(gameClient);
+                if (gameServer != null) gameServer.stopServer();
+                if (gameClient != null) gameClient.finalizeClient();
 
                 currentMenu = new serverModeMenu();
                 currentMenu.addListener(this);
@@ -127,7 +144,9 @@ public class menuHandler extends JPanel implements MenuListener
 
                 this.removeMouseListener(currentMenu);
                 this.removeMouseMotionListener(currentMenu);
-                this.removeKeyListener(game);
+                this.removeKeyListener(gameClient);
+                if (gameServer != null) gameServer.stopServer();
+                if (gameClient != null) gameClient.finalizeClient();
 
                 currentMenu = new pauseMenu();
                 currentMenu.addListener(this);
@@ -137,7 +156,6 @@ public class menuHandler extends JPanel implements MenuListener
 
                 repaint();
 
-                game = null;
                 break;
 
             case QUIT:
