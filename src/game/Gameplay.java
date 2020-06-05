@@ -67,14 +67,9 @@ public class Gameplay implements KeyListener, ActionListener {
         this.wbProtocol = new WallBreakerProtocol(inStream, outStream);
 
         if (isServer) {
-            boolean success = wbProtocol.sendObject(map);
+            boolean success = wbProtocol.sendMessage(GameStateMessage.MAP_PAYLOAD);
+            success &= wbProtocol.sendObject(map);
             if (!success) throw new RuntimeException("Failed to send map!");
-
-            try {
-                this.wait(500); // Might be bug
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
 
             GameStateMessage msg = wbProtocol.readMessage();
             if (msg != GameStateMessage.OK) {
@@ -83,6 +78,8 @@ public class Gameplay implements KeyListener, ActionListener {
             }
 
         } else {
+            GameStateMessage msg = wbProtocol.readMessage();
+            if (msg != GameStateMessage.MAP_PAYLOAD) throw new RuntimeException("Bad initial message!");
             GameMap gameMap = wbProtocol.readMap();
 
             if (gameMap != null) {
@@ -180,6 +177,7 @@ public class Gameplay implements KeyListener, ActionListener {
             }
         } else { // We are multiplayer client; receive map, send ctrl
             GameStateMessage msg = wbProtocol.readMessage();
+            if (msg == null) msg = GameStateMessage.EXITED;
             switch (msg) {
                 case MAP_PAYLOAD: {
                     map = wbProtocol.readMap();
@@ -191,11 +189,14 @@ public class Gameplay implements KeyListener, ActionListener {
                     // TODO: send player control input
                     break;
                 }
+                case GAME_FINISHED:
+                    // TODO: show highscore, stop game
                 default:
                 case EXITED: {
                     stop();
-                    // TODO
-                    //hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN);
+                    // TODO: show message that connection was lost
+                    System.out.println("Server has exited the game.");
+                    listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
                 }
             }
 
