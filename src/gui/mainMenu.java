@@ -8,19 +8,19 @@ import java.awt.event.MouseEvent;
 
 public class mainMenu extends Menu
 {
-    private enum BUTTONSTATE {SINGLEPLAYER, MULTIPLAYER, SETTINGS, HELP, QUIT, OTHER};
+    private enum BUTTONSTATE {SINGLEPLAYER, MULTIPLAYER, HIGHSCORE, ABOUT, QUIT, OTHER};
 
     private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
     private BUTTONSTATE buttonState                 = BUTTONSTATE.OTHER;
     private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]
-            { BUTTONSTATE.SINGLEPLAYER, BUTTONSTATE.MULTIPLAYER, BUTTONSTATE.SETTINGS, BUTTONSTATE.HELP, BUTTONSTATE.QUIT, BUTTONSTATE.OTHER };
+            { BUTTONSTATE.SINGLEPLAYER, BUTTONSTATE.MULTIPLAYER, BUTTONSTATE.HIGHSCORE, BUTTONSTATE.ABOUT, BUTTONSTATE.QUIT, BUTTONSTATE.OTHER };
 
-    private final int[] rectangleYArray             = new int[]{ 120, 175, 230, 285, 340 };
+    private final int[] rectangleYArray             = new int[]{ 180, 235, 290, 345, 400 };
 
     private final Rectangle singlePlayerButton      = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
     private final Rectangle multiplayerButton       = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle settingsButton          = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle helpButton              = new Rectangle(super.rectangleX, rectangleYArray[3], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle highScoreButton         = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle aboutButton             = new Rectangle(super.rectangleX, rectangleYArray[3], super.rectangleWidth, super.rectangleHeight);
     private final Rectangle quitButton              = new Rectangle(super.rectangleX, rectangleYArray[4], super.rectangleWidth, super.rectangleHeight);
 
     public mainMenu() {}
@@ -35,8 +35,8 @@ public class mainMenu extends Menu
         g2d.setColor(super.inactiveColor);
         g2d.fill(singlePlayerButton);
         g2d.fill(multiplayerButton);
-        g2d.fill(settingsButton);
-        g2d.fill(helpButton);
+        g2d.fill(highScoreButton);
+        g2d.fill(aboutButton);
         g2d.fill(quitButton);
 
         switch(buttonState)
@@ -55,18 +55,18 @@ public class mainMenu extends Menu
                 g2d.fill(multiplayerButton);
                 break;
 
-            case SETTINGS:
+            case HIGHSCORE:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(settingsButton);
+                g2d.fill(highScoreButton);
                 break;
 
-            case HELP:
+            case ABOUT:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(helpButton);
+                g2d.fill(aboutButton);
                 break;
 
             case QUIT:
@@ -80,8 +80,8 @@ public class mainMenu extends Menu
                 g2d.setColor(super.inactiveColor);
                 g2d.fill(singlePlayerButton);
                 g2d.fill(multiplayerButton);
-                g2d.fill(settingsButton);
-                g2d.fill(helpButton);
+                g2d.fill(highScoreButton);
+                g2d.fill(aboutButton);
                 g2d.fill(quitButton);
         }
 
@@ -90,8 +90,8 @@ public class mainMenu extends Menu
         g.setColor(super.fontColor);
         g.drawString("Single player", singlePlayerButton.x + 54, singlePlayerButton.y + 35);
         g.drawString("Multiplayer", multiplayerButton.x + 70, multiplayerButton.y + 35);
-        g.drawString("Settings", settingsButton.x + 90, settingsButton.y + 35);
-        g.drawString("Help", helpButton.x + 118, helpButton.y + 35);
+        g.drawString("High-scores", highScoreButton.x + 65, highScoreButton.y + 35);
+        g.drawString("About", aboutButton.x + 108, aboutButton.y + 35);
         g.drawString("Quit", quitButton.x + 118, quitButton.y + 35);
 
         clickedState = CLICKEDSTATE.OTHER;
@@ -167,14 +167,14 @@ public class mainMenu extends Menu
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SETTINGS);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.HIGHSCORE);
                 }
             }
             else if ((rectangleYArray[3] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[3])
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.HELP);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.ABOUT);
                 }
             }
             else if ((rectangleYArray[4] + rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[4])
