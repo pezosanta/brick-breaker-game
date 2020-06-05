@@ -1,27 +1,74 @@
 package gui;
 
+import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.*;
+import java.io.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class multiplayerMenu extends Menu
+public class serverModeMenu extends Menu implements ActionListener
 {
-    private enum BUTTONSTATE {SERVERMODE, CLIENTMODE, BACK, OTHER};
+    private enum BUTTONSTATE {BACK, OTHER}
 
     private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
     private BUTTONSTATE buttonState                 = BUTTONSTATE.OTHER;
-    private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]
-            { BUTTONSTATE.SERVERMODE, BUTTONSTATE.CLIENTMODE, BUTTONSTATE.BACK, BUTTONSTATE.OTHER };
+    private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]{BUTTONSTATE.BACK, BUTTONSTATE.OTHER};
 
-    private final int[] rectangleYArray             = new int[]{ 120, 175, 230 };
+    private final int[] rectangleYArray             = new int[]{400};
 
-    private final Rectangle serverModeButton = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle clientModeButton = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
 
-    public multiplayerMenu(){}
+    private String ipAddress;
+    private Timer timer;
+    private int delay = 1000;
+    private int counter = 60;
+
+    public serverModeMenu()
+    {
+        ipAddress = getIPAddress();
+        timer = new Timer(delay,this);
+        timer.start();
+    }
+
+    private String getIPAddress()
+    {
+        /*
+        try
+        {
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            //System.out.println("IP Address:- " + inetAddress.getHostAddress());
+            //System.out.println("Host Name:- " + inetAddress.getHostName());
+            return inetAddress.getHostAddress();
+        }
+        catch(java.net.UnknownHostException e)
+        {
+            //System.out.println("You are not connected to the internet!");
+            return "You are not connected to the internet!";
+        }
+        */
+
+        try
+        {
+            URL url_name = new URL("http://bot.whatismyipaddress.com");
+
+            BufferedReader sc =
+                    new BufferedReader(new InputStreamReader(url_name.openStream()));
+
+            // reads system IPAddress
+            return sc.readLine().trim();
+        }
+        catch (Exception e)
+        {
+            return "Cannot Execute Properly";
+        }
+    }
 
     @Override
     public void render(Graphics g)
@@ -31,26 +78,10 @@ public class multiplayerMenu extends Menu
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setColor(super.inactiveColor);
-        g2d.fill(serverModeButton);
-        g2d.fill(clientModeButton);
         g2d.fill(backButton);
 
         switch(buttonState)
         {
-            case SERVERMODE:
-                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
-                else { g2d.setColor(super.activeColor); }
-
-                g2d.fill(serverModeButton);
-                break;
-
-            case CLIENTMODE:
-                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
-                else { g2d.setColor(super.activeColor); }
-
-                g2d.fill(clientModeButton);
-                break;
-
             case BACK:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
@@ -60,17 +91,17 @@ public class multiplayerMenu extends Menu
 
             default:
                 g2d.setColor(super.inactiveColor);
-                g2d.fill(serverModeButton);
-                g2d.fill(clientModeButton);
                 g2d.fill(backButton);
         }
 
         Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
         g.setColor(super.fontColor);
-        g.drawString("Server mode", serverModeButton.x + 56, serverModeButton.y + 35);
-        g.drawString("Client mode", clientModeButton.x + 60, clientModeButton.y + 35);
         g.drawString("Back", backButton.x + 112, backButton.y + 35);
+
+        g.setColor(super.inactiveColor);
+        g.drawString("Waiting for Client to connect: " + counter, backButton.x - 100, backButton.y - 200);
+        g.drawString("Your IP address: " + ipAddress, backButton.x - 100, backButton.y - 130);
 
         clickedState = CLICKEDSTATE.OTHER;
     }
@@ -130,22 +161,30 @@ public class multiplayerMenu extends Menu
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SERVERMODE);
+                    timer.stop();
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER);
                 }
             }
-            else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e)
+    {
+        if(counter > 0)
+        {
+            counter --;
+            for (MenuListener hl : listeners)
             {
-                for (MenuListener hl : listeners)
-                {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.CLIENTMODE);
-                }
+                hl.menuPaintHandler();
             }
-            else if ((rectangleYArray[2] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[2])
+        }
+        else
+        {
+            for (MenuListener hl : listeners)
             {
-                for (MenuListener hl : listeners)
-                {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN);
-                }
+                timer.stop();
+                hl.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER);
             }
         }
     }

@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class menuHandler extends JPanel implements MenuListener
 {
-    public static enum MENUSTATE { MAIN, SINGLEPLAYER, MULTIPLAYER, SETTINGS, HELP, QUIT, HEROVSVILLAIN, COOPERATION, PAUSE };
+    public static enum MENUSTATE { MAIN, SINGLEPLAYER, MULTIPLAYER, SETTINGS, HELP, QUIT, SERVERMODE, CLIENTMODE, PAUSE };
     private MENUSTATE menuState = MENUSTATE.MAIN;
 
     private Menu currentMenu;
@@ -75,7 +75,8 @@ public class menuHandler extends JPanel implements MenuListener
                 this.removeMouseMotionListener(currentMenu);
                 this.removeKeyListener(game);
 
-                game = new Gameplay();
+                //game = new Gameplay();
+                game = Gameplay.startFromCheckpoint();
                 game.addListener(this);
 
                 this.addKeyListener(game);
@@ -97,6 +98,22 @@ public class menuHandler extends JPanel implements MenuListener
                 this.removeKeyListener(game);
 
                 currentMenu = new multiplayerMenu();
+                currentMenu.addListener(this);
+
+                this.addMouseListener(currentMenu);
+                this.addMouseMotionListener(currentMenu);
+
+                repaint();
+                break;
+
+            case SERVERMODE:
+                menuState = MENUSTATE.SERVERMODE;
+
+                this.removeMouseListener(currentMenu);
+                this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
+                currentMenu = new serverModeMenu();
                 currentMenu.addListener(this);
 
                 this.addMouseListener(currentMenu);
