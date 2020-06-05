@@ -5,12 +5,12 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class WallBreakerNetwork {
+public class WallBreakerConnection {
     static final int PORT = 31013;
     private ServerSocket serverSocket;
     private Socket socket;
 
-    public WallBreakerNetwork(boolean isServer) {
+    public WallBreakerConnection(boolean isServer) {
         socket = null;
         if (isServer) {
             try {
@@ -87,10 +87,10 @@ public class WallBreakerNetwork {
 
     public static void main(String[] args) {
         System.out.print("I am ");
-        System.out.println(WallBreakerNetwork.class);
+        System.out.println(WallBreakerConnection.class);
 
-        WallBreakerNetwork wbhost = new WallBreakerNetwork(true);
-        WallBreakerNetwork wbclient = new WallBreakerNetwork(false);
+        WallBreakerConnection wbhost = new WallBreakerConnection(true);
+        WallBreakerConnection wbclient = new WallBreakerConnection(false);
         InetAddress hostAddress = wbhost.getAddress();
 
         Thread thost = new Thread(new Runnable() {

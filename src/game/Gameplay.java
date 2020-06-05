@@ -5,6 +5,7 @@ import game.gameObjects.Wall;
 import gui.MenuListener;
 import gui.menuHandler;
 import networking.GameStateMessage;
+import networking.WallBreakerProtocol;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,8 +23,7 @@ public class Gameplay implements KeyListener, ActionListener {
     private boolean firstRun = true;
     private boolean isMultiplayer = false;
     private boolean isServer = false;
-    private ObjectInputStream inStream;
-    private ObjectOutputStream outStream;
+    private WallBreakerProtocol wbProtocol;
 
     private int score = 0;
     private int paddleSpeed = 8;
@@ -64,35 +64,31 @@ public class Gameplay implements KeyListener, ActionListener {
         this();
         this.isMultiplayer = true;
         this.isServer = isServer;
-        this.inStream = inStream;
-        this.outStream = outStream;
+        this.wbProtocol = new WallBreakerProtocol(inStream, outStream);
 
         if (isServer) {
-            try {
-                outStream.writeObject(map);
+            boolean success = wbProtocol.sendObject(map);
+            if (!success) throw new RuntimeException("Failed to send map!");
 
-                inStream.wait(500); // Might be bug
-                GameStateMessage msg = (GameStateMessage) inStream.readObject();
-                if (msg != GameStateMessage.OK) {
-                    System.out.println(msg.toString());
-                    throw new RuntimeException("Client failed to respond properly!");
-                }
-            } catch (IOException | InterruptedException | ClassNotFoundException e) {
+            try {
+                this.wait(500); // Might be bug
+            } catch (InterruptedException e) {
                 e.printStackTrace();
-                throw new RuntimeException(e);
+            }
+
+            GameStateMessage msg = wbProtocol.readMessage();
+            if (msg != GameStateMessage.OK) {
+                System.out.println(msg.toString());
+                throw new RuntimeException("Client failed to respond properly!");
             }
 
         } else {
-            GameMap gameMap = null;
-            try {
-                gameMap = (GameMap) inStream.readObject();
-                outStream.writeObject(GameStateMessage.OK);
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            GameMap gameMap = wbProtocol.readMap();
 
             if (gameMap != null) {
                 map = gameMap;
+                boolean success = wbProtocol.sendMessage(GameStateMessage.OK);
+                if (!success) throw new RuntimeException("Failed to send OK message!");
             } else {
                 throw new RuntimeException("Could not receive GameMap object from server! Aborting...");
             }
@@ -114,13 +110,9 @@ public class Gameplay implements KeyListener, ActionListener {
         if (!isMultiplayer) {
             map.createCheckpoint();
         } else {
-            try {
-                outStream.writeObject(GameStateMessage.EXITED);
-                outStream.close();
-                inStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            wbProtocol.sendMessage(GameStateMessage.EXITED);
+            wbProtocol.close();
+            wbProtocol = null;
         }
     }
 
@@ -169,11 +161,44 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     private void step() {
-        moveBallAndPaddle();
-        boolean hitBottomWall = handleCollisions();
-        if (hitBottomWall || map.getAvailableBricks() == 0) {
-            play = false;
-            firstRun = false;
+        if (!isMultiplayer || (isMultiplayer && isServer) ) {
+            moveBallAndPaddle();
+            boolean hitBottomWall = handleCollisions();
+            if (hitBottomWall || map.getAvailableBricks() == 0) {
+                play = false;
+                firstRun = false;
+
+                if (isServer) {
+                    wbProtocol.sendMessage(GameStateMessage.MAP_PAYLOAD);
+                    wbProtocol.sendObject(map);
+                    GameStateMessage msg = wbProtocol.readMessage();
+                    if (msg != GameStateMessage.OK) {
+                        stop();
+                        throw new RuntimeException("Client failed to read map payload.");
+                    }
+                }
+            }
+        } else { // We are multiplayer client; receive map, send ctrl
+            GameStateMessage msg = wbProtocol.readMessage();
+            switch (msg) {
+                case MAP_PAYLOAD: {
+                    map = wbProtocol.readMap();
+                    if (map == null) {
+                        stop();
+                        throw new RuntimeException("Received GameMap is null!");
+                    }
+                    wbProtocol.sendMessage(GameStateMessage.OK);
+                    // TODO: send player control input
+                    break;
+                }
+                default:
+                case EXITED: {
+                    stop();
+                    // TODO
+                    //hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN);
+                }
+            }
+
         }
     }
 
