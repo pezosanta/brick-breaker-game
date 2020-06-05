@@ -122,6 +122,22 @@ public class menuHandler extends JPanel implements MenuListener
                 repaint();
                 break;
 
+            case CLIENTMODE:
+                menuState = MENUSTATE.CLIENTMODE;
+
+                this.removeMouseListener(currentMenu);
+                this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
+                currentMenu = new clientModeMenu();
+                currentMenu.addListener(this);
+
+                this.addMouseListener(currentMenu);
+                this.addMouseMotionListener(currentMenu);
+
+                repaint();
+                break;
+
             case PAUSE:
                 menuState = MENUSTATE.PAUSE;
 
