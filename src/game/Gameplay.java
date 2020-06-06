@@ -4,7 +4,7 @@ import game.gameObjects.PowerUpType;
 import game.gameObjects.Wall;
 import gui.MenuListener;
 import gui.menuHandler;
-import networking.GameStateMessage;
+import networking.WBMessage;
 import networking.WallBreakerProtocol;
 
 import javax.swing.*;
@@ -17,12 +17,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static networking.WBMessage.MsgType.*;
+
 public class Gameplay implements KeyListener, ActionListener {
 
     private boolean play = false;
     private boolean firstRun = true;
     private boolean isMultiplayer = false;
-    private boolean isServer = false;
+    private boolean isServer = true;
     private WallBreakerProtocol wbProtocol;
 
     private int score = 0;
@@ -67,29 +69,26 @@ public class Gameplay implements KeyListener, ActionListener {
         this.wbProtocol = new WallBreakerProtocol(inStream, outStream);
 
         if (isServer) {
-            boolean success = wbProtocol.sendMessage(GameStateMessage.MAP_PAYLOAD);
-            success &= wbProtocol.sendObject(map);
+            boolean success = wbProtocol.sendMessage(new WBMessage(MAP, map));
             if (!success) throw new RuntimeException("Failed to send map!");
 
-            GameStateMessage msg = wbProtocol.readMessage();
-            if (msg != GameStateMessage.OK) {
+            WBMessage msg = wbProtocol.readMessage();
+            if (msg.msg != OK) {
                 System.out.println(msg.toString());
                 throw new RuntimeException("Client failed to respond properly!");
             }
 
         } else {
-            GameStateMessage msg = wbProtocol.readMessage();
-            if (msg != GameStateMessage.MAP_PAYLOAD) throw new RuntimeException("Bad initial message!");
-            GameMap gameMap = wbProtocol.readMap();
+            WBMessage msg = wbProtocol.readMessage();
+            if (msg == null || msg.msg != MAP) throw new RuntimeException("Bad initial message!");
 
-            if (gameMap != null) {
-                map = gameMap;
-                boolean success = wbProtocol.sendMessage(GameStateMessage.OK);
+            if (msg.payload != null) {
+                map = (GameMap) msg.payload;
+                boolean success = wbProtocol.sendMessage(new WBMessage(OK, null));
                 if (!success) throw new RuntimeException("Failed to send OK message!");
             } else {
                 throw new RuntimeException("Could not receive GameMap object from server! Aborting...");
             }
-
         }
     }
 
@@ -107,7 +106,7 @@ public class Gameplay implements KeyListener, ActionListener {
         if (!isMultiplayer) {
             map.createCheckpoint();
         } else {
-            wbProtocol.sendMessage(GameStateMessage.EXITED);
+            wbProtocol.sendMessage(new WBMessage(EXITED, null));
             wbProtocol.close();
             wbProtocol = null;
         }
@@ -158,48 +157,45 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     private void step() {
-        if (!isMultiplayer || (isMultiplayer && isServer) ) {
+        if (isServer) {
             moveBallAndPaddle();
             boolean hitBottomWall = handleCollisions();
             if (hitBottomWall || map.getAvailableBricks() == 0) {
                 play = false;
                 firstRun = false;
-
-                if (isServer) {
-                    wbProtocol.sendMessage(GameStateMessage.MAP_PAYLOAD);
-                    wbProtocol.sendObject(map);
-                    GameStateMessage msg = wbProtocol.readMessage();
-                    if (msg != GameStateMessage.OK) {
-                        stop();
-                        throw new RuntimeException("Client failed to read map payload.");
-                    }
-                }
             }
-        } else if (wbProtocol.dataAvailable()) { // We are multiplayer client; receive map, send ctrl
-            GameStateMessage msg = wbProtocol.readMessage();
-            if (msg == null) msg = GameStateMessage.EXITED;
-            switch (msg) {
-                case MAP_PAYLOAD: {
-                    map = wbProtocol.readMap();
-                    if (map == null) {
-                        stop();
-                        throw new RuntimeException("Received GameMap is null!");
-                    }
-                    wbProtocol.sendMessage(GameStateMessage.OK);
-                    // TODO: send player control input
-                    break;
-                }
-                case GAME_FINISHED:
-                    // TODO: show highscore, stop game
-                default:
-                case EXITED: {
+            if (isMultiplayer) {
+                boolean success = wbProtocol.sendMessage(new WBMessage(MAP, map));
+                WBMessage msg = wbProtocol.readMessage();
+                if (msg.msg != OK) {
                     stop();
-                    // TODO: show message that connection was lost
-                    System.out.println("Server has exited the game.");
-                    listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
+                    throw new RuntimeException("Client failed to read map payload.");
                 }
             }
-
+        } else { // We are multiplayer client; receive map, send ctrl
+            while (wbProtocol.dataAvailable()) {
+                WBMessage msg = wbProtocol.readMessage();
+                if (msg == null) msg = new WBMessage(EXITED, null);
+                switch (msg.msg) {
+                    case MAP:
+                        if (msg.payload == null) {
+                            stop();
+                            throw new RuntimeException("Received GameMap is null!");
+                        }
+                        map = (GameMap) msg.payload;
+                        wbProtocol.sendMessage(new WBMessage(OK, null));
+                        // TODO: send player control input
+                        break;
+                    case GAME_FINISHED:
+                        // TODO: show highscore, stop game
+                    default:
+                    case EXITED:
+                        stop();
+                        // TODO: show message that connection was lost
+                        System.out.println("Server has exited the game.");
+                        listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
+                }
+            }
         }
     }
 

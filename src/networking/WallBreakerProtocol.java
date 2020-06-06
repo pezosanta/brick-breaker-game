@@ -1,7 +1,5 @@
 package networking;
 
-import game.GameMap;
-
 import java.io.*;
 
 public class WallBreakerProtocol {
@@ -18,7 +16,7 @@ public class WallBreakerProtocol {
         }
     }
 
-    public boolean sendMessage(GameStateMessage msg) {
+    public boolean sendMessage(WBMessage msg) {
         try {
             outputStream.writeObject(msg);
             return true;
@@ -28,28 +26,9 @@ public class WallBreakerProtocol {
         return false;
     }
 
-    public boolean sendObject(Serializable obj) {
+    public WBMessage readMessage() {
         try {
-            outputStream.writeObject(obj);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public GameStateMessage readMessage() {
-        try {
-            return (GameStateMessage) inputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public GameMap readMap() {
-        try {
-            return (GameMap) inputStream.readObject();
+            return (WBMessage) inputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
