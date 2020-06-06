@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
+import java.io.File;
 
 public class mainMenu extends Menu
 {
@@ -153,7 +154,7 @@ public class mainMenu extends Menu
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MAPCHOOSER);
                 }
             }
             else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])
