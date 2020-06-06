@@ -24,7 +24,6 @@ public class GUI extends JFrame
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setLocation(450, 150);
-        this.setAlwaysOnTop(true);
     }
 
     public static void main(String[] args)
