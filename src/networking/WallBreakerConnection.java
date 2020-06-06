@@ -36,6 +36,7 @@ public class WallBreakerConnection {
             try {
                 serverSocket.setSoTimeout(timeout);
                 socket = serverSocket.accept();
+                socket.setSoTimeout(25);
                 connectionListener.accept(true);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -109,7 +110,10 @@ public class WallBreakerConnection {
                 System.out.println("Connection at host side was successful: " + success);
                 if (!success) return;
 
-                try (ObjectInputStream inStream = new ObjectInputStream(wbhost.getInputStream())) {
+                try {
+                    ObjectOutputStream outStream = new ObjectOutputStream(wbhost.getOutputStream());
+                    outStream.flush();
+                    ObjectInputStream inStream = new ObjectInputStream(wbhost.getInputStream());
                     System.out.println("Trying to get messages...");
 
                     while (true) {
@@ -136,6 +140,8 @@ public class WallBreakerConnection {
 
             try {
                 ObjectOutputStream outStream = new ObjectOutputStream(wbclient.getOutputStream());
+                outStream.flush();
+                ObjectInputStream inStream = new ObjectInputStream(wbclient.getInputStream());
                 for (int i = 0; i < 5; i++) {
                     outStream.writeUTF("" + i + ". számú üzenet.");
                 }
@@ -149,7 +155,7 @@ public class WallBreakerConnection {
         });
 
         wbhost.waitForConnection(connectionListener);
-        //tclient.start();
+        tclient.start();
 
         try {
             //thost.join();
