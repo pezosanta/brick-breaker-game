@@ -7,11 +7,13 @@ import java.awt.*;
 
 public class menuHandler extends JPanel implements MenuListener
 {
-    public static enum MENUSTATE { MAIN, SINGLEPLAYER, MULTIPLAYER, HIGHSCORE, ABOUT, QUIT, SERVERMODE, CLIENTMODE, PAUSE, MAPCHOOSER };
+    public static enum MENUSTATE { MAIN, SINGLEPLAYER, MULTIPLAYER, MULTIPLAYERGAME, HIGHSCORE, ABOUT, QUIT, SERVERMODE, CLIENTMODE, PAUSE, MAPCHOOSER };
     private MENUSTATE menuState = MENUSTATE.MAIN;
 
     private Menu currentMenu;
     private Gameplay game;
+
+    private JTextField ipTextField;
 
     public menuHandler()
     {
@@ -97,6 +99,10 @@ public class menuHandler extends JPanel implements MenuListener
                 this.removeMouseMotionListener(currentMenu);
                 this.removeKeyListener(game);
 
+                // Remove JTextField if added previously
+                Component[] componentList = this.getComponents();
+                for(Component c : componentList) { if(c instanceof JTextField){ this.remove(c); } }
+
                 currentMenu = new multiplayerMenu();
                 currentMenu.addListener(this);
 
@@ -147,6 +153,9 @@ public class menuHandler extends JPanel implements MenuListener
 
                 currentMenu = new clientModeMenu();
                 currentMenu.addListener(this);
+
+                ipTextField = ((clientModeMenu)currentMenu).getJTextField();
+                this.add(ipTextField);
 
                 this.addMouseListener(currentMenu);
                 this.addMouseMotionListener(currentMenu);

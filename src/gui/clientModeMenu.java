@@ -6,68 +6,67 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.*;
-import java.io.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class clientModeMenu extends Menu implements ActionListener
 {
-    private enum BUTTONSTATE {BACK, OTHER}
+    private enum BUTTONSTATE {CONNECT, BACK, OTHER}
 
     private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
     private BUTTONSTATE buttonState                 = BUTTONSTATE.OTHER;
-    private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]{BUTTONSTATE.BACK, BUTTONSTATE.OTHER};
+    private final BUTTONSTATE[] buttonStateArray1   = new BUTTONSTATE[]{ BUTTONSTATE.BACK, BUTTONSTATE.OTHER};
+    private final BUTTONSTATE[] buttonStateArray2   = new BUTTONSTATE[]{ BUTTONSTATE.CONNECT, BUTTONSTATE.OTHER};
 
     private final int[] rectangleYArray             = new int[]{400};
+    private final int[] connectYArray               = new int[]{150};
 
+    private final Rectangle connectButton           = new Rectangle(super.xTitle + 400, connectYArray[0], 192, super.rectangleHeight);
     private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
 
-    private String ipAddress;
+    private List<String> buttonNames = new ArrayList<String>(Arrays.asList("connect", "back"));
+
+    private Boolean startConnecting = false;
+
     private Timer timer;
     private int delay = 1000;
     private int counter = 60;
 
+    private JTextField ipTextField;
+
     public clientModeMenu()
     {
-        ipAddress = getIPAddress();
+        createJTextField();
         timer = new Timer(delay,this);
-        timer.start();
     }
 
-    private String getIPAddress()
+    private void createJTextField()
     {
-        /*
-        try
-        {
-            InetAddress inetAddress = InetAddress.getLocalHost();
-            //System.out.println("IP Address:- " + inetAddress.getHostAddress());
-            //System.out.println("Host Name:- " + inetAddress.getHostName());
-            return inetAddress.getHostAddress();
-        }
-        catch(java.net.UnknownHostException e)
-        {
-            //System.out.println("You are not connected to the internet!");
-            return "You are not connected to the internet!";
-        }
-        */
+        Font ipFont = new Font(super.fontStyle, Font.BOLD, super.fontSize);
+        ipTextField = new JTextField("Enter server IP address.");
+        ipTextField.setBounds(super.xTitle,150,392,50); //592
+        ipTextField.setFont(ipFont);
+    }
 
-        try
-        {
-            URL url_name = new URL("http://bot.whatismyipaddress.com");
+    public JTextField getJTextField()
+    {
+        return ipTextField;
+    }
 
-            BufferedReader sc =
-                    new BufferedReader(new InputStreamReader(url_name.openStream()));
+    public List<Integer> getTextWidth(Graphics g)
+    {
+        List<Integer> textWidths = new ArrayList<Integer>();
 
-            // reads system IPAddress
-            return sc.readLine().trim();
-        }
-        catch (Exception e)
+        for (String buttonName : buttonNames)
         {
-            return "Cannot Execute Properly";
+            String buttonNameUpperCase = buttonName.toUpperCase();
+            textWidths.add(g.getFontMetrics().stringWidth(buttonNameUpperCase));
         }
+
+        return textWidths;
     }
 
     @Override
@@ -82,6 +81,13 @@ public class clientModeMenu extends Menu implements ActionListener
 
         switch(buttonState)
         {
+            case CONNECT:
+                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
+                else { g2d.setColor(super.activeColor); }
+
+                g2d.fill(connectButton);
+                break;
+
             case BACK:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
@@ -91,17 +97,22 @@ public class clientModeMenu extends Menu implements ActionListener
 
             default:
                 g2d.setColor(super.inactiveColor);
+                g2d.fill(connectButton);
                 g2d.fill(backButton);
         }
 
         Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
         g.setColor(super.fontColor);
-        g.drawString("Back", backButton.x + 112, backButton.y + 35);
+        List<Integer> textWidths = getTextWidth(g);
+        g.drawString(buttonNames.get(0).toUpperCase(), connectButton.x + ((connectButton.width - textWidths.get(0)) / 2), connectButton.y + 35);
+        g.drawString(buttonNames.get(1).toUpperCase(), backButton.x + ((backButton.width - textWidths.get(1)) / 2), backButton.y + 35);
 
-        g.setColor(super.inactiveColor);
-        g.drawString("Waiting for Client to connect: " + counter, backButton.x - 100, backButton.y - 200);
-        g.drawString("Your IP address: " + ipAddress, backButton.x - 100, backButton.y - 130);
+        if (startConnecting)
+        {
+            g.setColor(super.inactiveColor);
+            g.drawString("Connecting to the server: " + counter, backButton.x - 60, backButton.y - 100);
+        }
 
         clickedState = CLICKEDSTATE.OTHER;
     }
@@ -109,9 +120,13 @@ public class clientModeMenu extends Menu implements ActionListener
     @Override
     public void mouseMoved(MouseEvent e)
     {
-        if ((super.rectangleX + super.rectangleWidth) >= e.getX() && e.getX() >= super.rectangleX)
+        if ((backButton.x + backButton.width) >= e.getX() && e.getX() >= backButton.x )
         {
-            buttonState = buttonStateArray[super.mouseMovedHelper(rectangleYArray, e.getY())];
+            buttonState = buttonStateArray1[super.mouseMovedHelper(rectangleYArray, e.getY())];
+        }
+        if ((connectButton.x + connectButton.width) >= e.getX() && e.getX() >= connectButton.x)
+        {
+           buttonState = buttonStateArray2[super.mouseMovedHelper(connectYArray, e.getY())];
         }
         else
         {
@@ -130,6 +145,10 @@ public class clientModeMenu extends Menu implements ActionListener
         if ((super.rectangleX + super.rectangleWidth) >= e.getX() && e.getX() >= super.rectangleX)
         {
             clickedState = super.clickedStateArray[super.mousePressedHelper(rectangleYArray, e.getY())];
+        }
+        if ((connectButton.x + connectButton.width) >= e.getX() && e.getX() >= connectButton.x)
+        {
+            clickedState = super.clickedStateArray[super.mousePressedHelper(connectYArray, e.getY())];
         }
         else
         {
@@ -155,16 +174,19 @@ public class clientModeMenu extends Menu implements ActionListener
     @Override
     public void mouseClicked(MouseEvent e)
     {
-        if ((super.rectangleX + super.rectangleWidth) >= e.getX() && e.getX() >= super.rectangleX)
+        if ((backButton.x + backButton.width) >= e.getX() && e.getX() >= backButton.x && (backButton.y + backButton.height) >= e.getY() && e.getY() >= backButton.y)
         {
-            if ((rectangleYArray[0] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[0])
+            for (MenuListener hl : listeners)
             {
-                for (MenuListener hl : listeners)
-                {
-                    timer.stop();
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER);
-                }
+                timer.stop();
+                hl.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER);
             }
+        }
+        else if ((connectButton.x + connectButton.width) >= e.getX() && e.getX() >= connectButton.x && (connectButton.y + connectButton.height) >= e.getY() && e.getY() >= connectButton.y)
+        {
+            startConnecting = true;
+            timer.start();
+            System.out.println(ipTextField.getText());
         }
     }
 

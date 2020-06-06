@@ -102,7 +102,7 @@ public class serverModeMenu extends Menu implements ActionListener
 
         g.setColor(super.inactiveColor);
         g.drawString("Waiting for Client to connect: " + counter, backButton.x - 100, backButton.y - 200);
-        g.drawString("Your IP address: " + ipAddress, backButton.x - 100, backButton.y - 130);
+        g.drawString("Your IP address: " + ipAddress, backButton.x - 80, backButton.y - 130);
 
         clickedState = CLICKEDSTATE.OTHER;
     }
