@@ -17,7 +17,7 @@ public class Menu implements MouseMotionListener, MouseListener
     protected final int rectangleHeight                 = 50;
     protected final int rectangleX                      = (GUI.WIDTH - rectangleWidth) / 2;
 
-    protected final String fontStyle                    = "arial";
+    protected final String fontStyle                    = "Apple casual";
     protected final int fontSize                        = 30;
     protected final Color fontColor                     = Color.WHITE;
 
@@ -37,7 +37,7 @@ public class Menu implements MouseMotionListener, MouseListener
 
     public void render(Graphics g)
     {
-        Font fnt0 = new Font("arial", Font.BOLD, sizeTitle);
+        Font fnt0 = new Font(fontStyle, Font.BOLD, sizeTitle);
         g.setFont(fnt0);
         g.setColor(Color.black);
         g.drawString("BRICK BREAKER GAME", xTitle, yTitle);

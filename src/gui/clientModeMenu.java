@@ -13,7 +13,7 @@ import java.io.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class serverModeMenu extends Menu implements ActionListener
+public class clientModeMenu extends Menu implements ActionListener
 {
     private enum BUTTONSTATE {BACK, OTHER}
 
@@ -30,7 +30,7 @@ public class serverModeMenu extends Menu implements ActionListener
     private int delay = 1000;
     private int counter = 60;
 
-    public serverModeMenu()
+    public clientModeMenu()
     {
         ipAddress = getIPAddress();
         timer = new Timer(delay,this);
@@ -39,7 +39,7 @@ public class serverModeMenu extends Menu implements ActionListener
 
     private String getIPAddress()
     {
-
+        /*
         try
         {
             InetAddress inetAddress = InetAddress.getLocalHost();
@@ -52,8 +52,8 @@ public class serverModeMenu extends Menu implements ActionListener
             //System.out.println("You are not connected to the internet!");
             return "You are not connected to the internet!";
         }
+        */
 
-        /*
         try
         {
             URL url_name = new URL("http://bot.whatismyipaddress.com");
@@ -68,7 +68,6 @@ public class serverModeMenu extends Menu implements ActionListener
         {
             return "Cannot Execute Properly";
         }
-         */
     }
 
     @Override

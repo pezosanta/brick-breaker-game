@@ -69,7 +69,7 @@ public class aboutMenu extends Menu
         g.drawString("Marton Tim", aboutBackground.x + 261, aboutBackground.y + 140);
 
         g.drawString("Advisor:", aboutBackground.x + 10, aboutBackground.y + 180);
-        g.drawString("Zsolt Karandi", aboutBackground.x + 258, aboutBackground.y + 180);
+        g.drawString("Zsolt Karandi", aboutBackground.x + 257, aboutBackground.y + 180);
 
         //g.drawString("Waiting for Client to connect: " + counter, backButton.x - 100, backButton.y - 200);
         //g.drawString("Your IP address: " + ipAddress, backButton.x - 100, backButton.y - 130);

@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class menuHandler extends JPanel implements MenuListener
 {
-    public static enum MENUSTATE { MAIN, SINGLEPLAYER, MULTIPLAYER, HIGHSCORE, ABOUT, QUIT, SERVERMODE, CLIENTMODE, PAUSE };
+    public static enum MENUSTATE { MAIN, SINGLEPLAYER, MULTIPLAYER, HIGHSCORE, ABOUT, QUIT, SERVERMODE, CLIENTMODE, PAUSE, MAPCHOOSER };
     private MENUSTATE menuState = MENUSTATE.MAIN;
 
     private Menu currentMenu;
@@ -152,6 +152,22 @@ public class menuHandler extends JPanel implements MenuListener
                 this.addMouseMotionListener(currentMenu);
 
                 repaint();
+                break;
+
+            case MAPCHOOSER:
+                menuState = MENUSTATE.MAPCHOOSER;
+
+                this.removeMouseListener(currentMenu);
+                this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
+                currentMenu = new mapChooserMenu();
+                currentMenu.addListener(this);
+
+                this.addMouseListener(currentMenu);
+                this.addMouseMotionListener(currentMenu);
+
+                //repaint();
                 break;
 
             case PAUSE:

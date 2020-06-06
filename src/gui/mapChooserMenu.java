@@ -1,30 +1,50 @@
 package gui;
 
-import java.awt.Rectangle;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-public class mainMenu extends Menu
+public class mapChooserMenu extends Menu
 {
-    private enum BUTTONSTATE {SINGLEPLAYER, MULTIPLAYER, HIGHSCORE, ABOUT, QUIT, OTHER};
+    private enum BUTTONSTATE { MAP1, MAP2, MAP3, MAP4, BACK, OTHER};
 
     private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
     private BUTTONSTATE buttonState                 = BUTTONSTATE.OTHER;
     private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]
-            { BUTTONSTATE.SINGLEPLAYER, BUTTONSTATE.MULTIPLAYER, BUTTONSTATE.HIGHSCORE, BUTTONSTATE.ABOUT, BUTTONSTATE.QUIT, BUTTONSTATE.OTHER };
+            { BUTTONSTATE.MAP1, BUTTONSTATE.MAP2, BUTTONSTATE.MAP3, BUTTONSTATE.MAP4, BUTTONSTATE.BACK, BUTTONSTATE.OTHER };
 
     private final int[] rectangleYArray             = new int[]{ 180, 235, 290, 345, 400 };
 
-    private final Rectangle singlePlayerButton      = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle multiplayerButton       = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle highScoreButton         = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle aboutButton             = new Rectangle(super.rectangleX, rectangleYArray[3], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle quitButton              = new Rectangle(super.rectangleX, rectangleYArray[4], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle map1Button              = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle map2Button              = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle map3Button              = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle map4Button              = new Rectangle(super.rectangleX, rectangleYArray[3], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[4], super.rectangleWidth, super.rectangleHeight);
 
-    public mainMenu() {}
+
+    private File folder = new File("./resources/maps/");
+    private List<String> mapNames = new ArrayList<String>();
+
+    public mapChooserMenu() { getMapNames(); }
+
+    public void getMapNames()
+    {
+        File[] listOfFiles = folder.listFiles();
+
+        for (int i = 0; i < listOfFiles.length; i++)
+        {
+            if (listOfFiles[i].isFile())
+            {
+                mapNames.add(listOfFiles[i].getName().split("\\.")[0]);
+            }
+            else if (listOfFiles[i].isDirectory())
+            {
+                System.out.println("Directory " + listOfFiles[i].getName());
+            }
+        }
+    }
 
     @Override
     public void render(Graphics g)
@@ -34,66 +54,66 @@ public class mainMenu extends Menu
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setColor(super.inactiveColor);
-        g2d.fill(singlePlayerButton);
-        g2d.fill(multiplayerButton);
-        g2d.fill(highScoreButton);
-        g2d.fill(aboutButton);
-        g2d.fill(quitButton);
+        g2d.fill(map1Button);
+        g2d.fill(map2Button);
+        g2d.fill(map3Button);
+        g2d.fill(map4Button);
+        g2d.fill(backButton);
 
         switch(buttonState)
         {
-            case SINGLEPLAYER:
+            case MAP1:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(singlePlayerButton);
+                g2d.fill(map1Button);
                 break;
 
-            case MULTIPLAYER:
+            case MAP2:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(multiplayerButton);
+                g2d.fill(map2Button);
                 break;
 
-            case HIGHSCORE:
+            case MAP3:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(highScoreButton);
+                g2d.fill(map3Button);
                 break;
 
-            case ABOUT:
+            case MAP4:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(aboutButton);
+                g2d.fill(map4Button);
                 break;
 
-            case QUIT:
+            case BACK:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
-                g2d.fill(quitButton);
+                g2d.fill(backButton);
                 break;
 
             default:
                 g2d.setColor(super.inactiveColor);
-                g2d.fill(singlePlayerButton);
-                g2d.fill(multiplayerButton);
-                g2d.fill(highScoreButton);
-                g2d.fill(aboutButton);
-                g2d.fill(quitButton);
+                g2d.fill(map1Button);
+                g2d.fill(map2Button);
+                g2d.fill(map3Button);
+                g2d.fill(map4Button);
+                g2d.fill(backButton);
         }
 
         Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
         g.setColor(super.fontColor);
-        g.drawString("Single player", singlePlayerButton.x + 55, singlePlayerButton.y + 35);
-        g.drawString("Multiplayer", multiplayerButton.x + 69, multiplayerButton.y + 35);
-        g.drawString("High-scores", highScoreButton.x + 63, highScoreButton.y + 35);
-        g.drawString("About", aboutButton.x + 106, aboutButton.y + 35);
-        g.drawString("Quit", quitButton.x + 118, quitButton.y + 35);
+        g.drawString("MAP 1", map1Button.x + 55, map1Button.y + 35);
+        g.drawString("MAP 2", map2Button.x + 69, map2Button.y + 35);
+        g.drawString("MAP 3", map3Button.x + 63, map3Button.y + 35);
+        g.drawString("MAP 4", map4Button.x + 106, map4Button.y + 35);
+        g.drawString("BACK", backButton.x + 118, backButton.y + 35);
 
         clickedState = CLICKEDSTATE.OTHER;
     }
@@ -154,35 +174,35 @@ public class mainMenu extends Menu
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MAPCHOOSER);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
                 }
             }
             else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
                 }
             }
             else if ((rectangleYArray[2] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[2])
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.HIGHSCORE);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
                 }
             }
             else if ((rectangleYArray[3] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[3])
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.ABOUT);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
                 }
             }
             else if ((rectangleYArray[4] + rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[4])
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.QUIT);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN);
                 }
             }
         }
