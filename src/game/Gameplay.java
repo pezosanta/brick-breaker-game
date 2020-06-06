@@ -175,7 +175,7 @@ public class Gameplay implements KeyListener, ActionListener {
                     }
                 }
             }
-        } else { // We are multiplayer client; receive map, send ctrl
+        } else if (wbProtocol.dataAvailable()) { // We are multiplayer client; receive map, send ctrl
             GameStateMessage msg = wbProtocol.readMessage();
             if (msg == null) msg = GameStateMessage.EXITED;
             switch (msg) {

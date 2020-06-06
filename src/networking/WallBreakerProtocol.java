@@ -56,6 +56,15 @@ public class WallBreakerProtocol {
         return null;
     }
 
+    public boolean dataAvailable() {
+        try {
+            return inputStream.available() > 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public void close() {
         try {
             inputStream.close();
