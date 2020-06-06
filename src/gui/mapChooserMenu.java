@@ -1,13 +1,20 @@
 package gui;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class mapChooserMenu extends Menu
+public class mapChooserMenu extends Menu implements ActionListener
 {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+    }
+
     private enum BUTTONSTATE { MAP1, MAP2, MAP3, MAP4, BACK, OTHER};
 
     private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
@@ -15,6 +22,7 @@ public class mapChooserMenu extends Menu
     private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]
             { BUTTONSTATE.MAP1, BUTTONSTATE.MAP2, BUTTONSTATE.MAP3, BUTTONSTATE.MAP4, BUTTONSTATE.BACK, BUTTONSTATE.OTHER };
 
+    private final int[] rectangleXArray             = new int[]{};
     private final int[] rectangleYArray             = new int[]{ 180, 235, 290, 345, 400 };
 
     private final Rectangle map1Button              = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
@@ -22,7 +30,6 @@ public class mapChooserMenu extends Menu
     private final Rectangle map3Button              = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
     private final Rectangle map4Button              = new Rectangle(super.rectangleX, rectangleYArray[3], super.rectangleWidth, super.rectangleHeight);
     private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[4], super.rectangleWidth, super.rectangleHeight);
-
 
     private File folder = new File("./resources/maps/");
     private List<String> mapNames = new ArrayList<String>();
@@ -44,6 +51,20 @@ public class mapChooserMenu extends Menu
                 System.out.println("Directory " + listOfFiles[i].getName());
             }
         }
+        mapNames.add("back");
+    }
+
+    public List<Integer> getTextWidth(Graphics g)
+    {
+        List<Integer> textWidths = new ArrayList<Integer>();
+
+        for (String mapName : mapNames)
+        {
+            String mapNameUpperCase = mapName.toUpperCase();
+            textWidths.add(g.getFontMetrics().stringWidth(mapNameUpperCase));
+        }
+
+        return textWidths;
     }
 
     @Override
@@ -109,11 +130,12 @@ public class mapChooserMenu extends Menu
         Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
         g.setColor(super.fontColor);
-        g.drawString("MAP 1", map1Button.x + 55, map1Button.y + 35);
-        g.drawString("MAP 2", map2Button.x + 69, map2Button.y + 35);
-        g.drawString("MAP 3", map3Button.x + 63, map3Button.y + 35);
-        g.drawString("MAP 4", map4Button.x + 106, map4Button.y + 35);
-        g.drawString("BACK", backButton.x + 118, backButton.y + 35);
+        List<Integer> textWidths = getTextWidth(g);
+        g.drawString(mapNames.get(0).toUpperCase(), map1Button.x + ((map1Button.width - textWidths.get(0)) / 2), map1Button.y + 35);
+        g.drawString(mapNames.get(1).toUpperCase(), map2Button.x + ((map1Button.width - textWidths.get(1)) / 2), map2Button.y + 35);
+        g.drawString(mapNames.get(2).toUpperCase(), map3Button.x + ((map1Button.width - textWidths.get(2)) / 2), map3Button.y + 35);
+        g.drawString(mapNames.get(3).toUpperCase(), map4Button.x + ((map1Button.width - textWidths.get(3)) / 2), map4Button.y + 35);
+        g.drawString(mapNames.get(4).toUpperCase(), backButton.x + ((map1Button.width - textWidths.get(4)) / 2), backButton.y + 35);
 
         clickedState = CLICKEDSTATE.OTHER;
     }
