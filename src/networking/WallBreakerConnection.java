@@ -36,7 +36,7 @@ public class WallBreakerConnection {
             try {
                 serverSocket.setSoTimeout(timeout);
                 socket = serverSocket.accept();
-                socket.setSoTimeout(25);
+                socket.setSoTimeout(10);
                 connectionListener.accept(true);
             } catch (IOException e) {
                 e.printStackTrace();

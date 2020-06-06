@@ -6,11 +6,13 @@ import java.util.function.Consumer;
 
 public class WallBreakerProtocol {
 
+    private InputStream inStream;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
 
     public WallBreakerProtocol(InputStream in, OutputStream out) {
         try {
+            inStream = in;
             outputStream = new ObjectOutputStream(out);
             outputStream.flush();
             inputStream = new ObjectInputStream(in);
@@ -38,13 +40,13 @@ public class WallBreakerProtocol {
         return null;
     }
 
-    public boolean dataAvailable() {
+    public boolean isDataAvailable() {
         try {
-            return inputStream.available() > 0;
+            return inStream.available() > 0;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     public void close() {
@@ -74,7 +76,7 @@ public class WallBreakerProtocol {
                 System.out.println("Trying to get messages...");
 
                 while (true) {
-                    if (true || wbProtocol.dataAvailable()) {
+                    if (wbProtocol.isDataAvailable()) {
                         WBMessage msg = wbProtocol.readMessage();
                         if (msg == null) msg = new WBMessage(WBMessage.MsgType.EXITED, "");
 
@@ -96,6 +98,12 @@ public class WallBreakerProtocol {
             System.out.println("Connection at client side was successful: " + success);
             if (!success) return;
             WallBreakerProtocol wbProtocol = new WallBreakerProtocol(wbclient.getInputStream(), wbclient.getOutputStream());
+
+            try {
+                Thread.sleep(40);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             for (int i = 0; i < 5; i++) {
                 String messagePayload = ("" + i + ". számú üzenet.");

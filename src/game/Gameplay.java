@@ -15,6 +15,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
 import static networking.WBMessage.MsgType.*;
@@ -23,6 +25,7 @@ public class Gameplay implements KeyListener, ActionListener {
 
     private boolean isStarted = false;
     private boolean isEnded = false;
+    private boolean isReady = false;
 
     private boolean isMultiplayer = false;
     private boolean isServer = true;
@@ -38,6 +41,7 @@ public class Gameplay implements KeyListener, ActionListener {
     private int delay = 16;
 
     private GameMap map;
+    private Queue<WBMessage> myEvents = new LinkedList<>();
 
     private Random random;
 
@@ -148,33 +152,62 @@ public class Gameplay implements KeyListener, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (isStarted && !isEnded) {
-            step();
-        }
-
-        for (MenuListener hl : listeners)
-        {
-            hl.gamePaintHandler();
-        }
-    }
-
-    private void step() {
+        // Do server things: process own key events, process client messages, step gameplay, send map to client (and maybe control)
         if (isServer) {
-            moveBallAndPaddle();
-            boolean hitBottomWall = handleCollisions();
-            if (hitBottomWall || map.getAvailableBricks() == 0) {
-                isEnded = true;
-            }
-            if (isMultiplayer) {
-                boolean success = wbProtocol.sendMessage(new WBMessage(MAP, map));
-                WBMessage msg = wbProtocol.readMessage();
-                if (msg.msg != OK) {
-                    stop();
-                    throw new RuntimeException("Client failed to read map payload.");
+            // Process own key events
+            while (!myEvents.isEmpty()) {
+                WBMessage msg = myEvents.poll();
+                switch (msg.msg) {
+                    case PLAYER_RELEASED:
+                        stopMove();
+                        break;
+                    case PLAYER_PRESSED:
+                        isReady = true;
+                        switch ((int) msg.payload) {
+                            case KeyEvent.VK_LEFT:
+                                moveLeft();
+                                break;
+                            case KeyEvent.VK_RIGHT:
+                                moveRight();
+                                break;
+                        }
                 }
             }
-        } else { // We are multiplayer client; receive map, send ctrl
-            while (wbProtocol.dataAvailable()) {
+
+            // TODO: process client events if multiplayer
+            if (isMultiplayer && !isEnded) {
+                // Process client messages
+                while (wbProtocol.isDataAvailable()) {
+                    WBMessage msg = wbProtocol.readMessage();
+                    if (msg == null) msg = new WBMessage(EXITED, null);
+                    switch (msg.msg) {
+                        case PLAYER_PRESSED:
+                        case PLAYER_RELEASED:
+                        case PLAYER_READY:
+                        case EXITED:
+                            break;
+                    }
+                }
+            }
+
+            // If players are ready: start game!
+            if (isReady) isStarted = true;
+
+            // Update game map if play is started but not ended
+            if (isStarted && !isEnded) {
+                step();
+
+                // Send updated game map to client
+                if (isMultiplayer) {
+                    wbProtocol.sendMessage(new WBMessage(MAP, map));
+                }
+            }
+        }
+
+        // We are multiplayer client; receive map from server, send user inputs to server
+        if (isMultiplayer && !isServer && !isEnded) {
+            // Process server messages
+            while (wbProtocol.isDataAvailable()) {
                 WBMessage msg = wbProtocol.readMessage();
                 if (msg == null) msg = new WBMessage(EXITED, null);
                 switch (msg.msg) {
@@ -184,11 +217,8 @@ public class Gameplay implements KeyListener, ActionListener {
                             throw new RuntimeException("Received GameMap is null!");
                         }
                         map = (GameMap) msg.payload;
-                        wbProtocol.sendMessage(new WBMessage(OK, null));
-                        // TODO: send player control input
                         break;
                     case GAME_FINISHED:
-                        // TODO: show highscore, stop game
                         stop();
                         isEnded = true;
                     default:
@@ -200,6 +230,20 @@ public class Gameplay implements KeyListener, ActionListener {
                         listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
                 }
             }
+
+            // Send player control input to server
+            while (!myEvents.isEmpty()) wbProtocol.sendMessage(myEvents.poll());
+        }
+
+        // Draw game (calls this.render implicitly)
+        listeners.forEach(menuListener -> menuListener.gamePaintHandler());
+    }
+
+    private void step() {
+        moveBallAndPaddle();
+        boolean hitBottomWall = handleCollisions();
+        if (hitBottomWall || map.getAvailableBricks() == 0) {
+            isEnded = true;
         }
     }
 
@@ -268,53 +312,60 @@ public class Gameplay implements KeyListener, ActionListener {
     public void keyReleased(KeyEvent e) {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_RIGHT:
-            case KeyEvent.VK_LEFT: {
-                stopMove();
+            case KeyEvent.VK_LEFT:
+                myEvents.add(new WBMessage(PLAYER_RELEASED, e.getKeyCode()));
                 break;
-            }
+            default:
+                break;
         }
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            moveRight();
+            myEvents.add(new WBMessage(PLAYER_PRESSED, e.getKeyCode()));
         }
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            moveLeft();
+            myEvents.add(new WBMessage(PLAYER_PRESSED, e.getKeyCode()));
         }
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             if (isEnded) {
-                map.reset();
-                isStarted = false;
-                isEnded = false;
-                score = 0;
+                if (!isMultiplayer) {
+                    map.reset();
+                    isReady = false;
+                    isStarted = false;
+                    isEnded = false;
+                    score = 0;
 
-                for (MenuListener hl : listeners)
-                {
-                    hl.gamePaintHandler();
+                    for (MenuListener hl : listeners) {
+                        hl.gamePaintHandler();
+                    }
+                } else {
+                    // If in multiplayer, game ended and enter pressed: switch to main menu
+                    listeners.forEach(menuListener -> menuListener.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
                 }
             }
         }
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
         {
-            for (MenuListener hl : listeners)
-            {
-                stop();
-                hl.menuSwitchHandler(menuHandler.MENUSTATE.PAUSE);
+            stop();
+            if (!isMultiplayer) {
+                listeners.forEach(menuListener -> menuListener.menuSwitchHandler(menuHandler.MENUSTATE.PAUSE));
+            } else {
+                listeners.forEach(menuListener -> menuListener.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
             }
         }
     }
 
     public void stopMove(){
-        if (isEnded == false){
+        if (!isEnded){
             isStarted = true;
         }
         map.paddle.setSpeedX(0);
     }
 
     public void moveRight(){
-        if (isEnded == false){
+        if (!isEnded){
             isStarted = true;
         }
         if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
@@ -323,7 +374,7 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     public void moveLeft(){
-        if (isEnded == false){
+        if (!isEnded){
             isStarted = true;
         }
         if (map.paddle.getPosition().x > (map.wallWidth)) {
