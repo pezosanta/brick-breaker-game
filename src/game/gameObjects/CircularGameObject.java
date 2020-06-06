@@ -22,7 +22,7 @@ public class CircularGameObject extends GameObject {
 
     @Override
     public void draw(Graphics2D g) {
-        g.setColor(this.color);
+        g.setColor(color);
         g.fillOval(position.x - radius/2, position.y - radius/2, radius, radius);
     }
 

@@ -65,15 +65,6 @@ public class GameMap implements Serializable {
             for (int j=0; j< bricks[i].length; j++) {
                 bricks[i][j] = new Brick(j * brickWidth + 80, i * brickHeight + 50,
                         brickWidth*9/10, brickHeight*9/10, startingHealth[i][j]);
-                if(bricks[i][j].getHealth() == 1) {
-                    bricks[i][j].setColor(Color.GREEN);
-                }
-                if(bricks[i][j].getHealth() == 2) {
-                    bricks[i][j].setColor(Color.BLUE);
-                }
-                if(bricks[i][j].getHealth() == 3) {
-                    bricks[i][j].setColor(Color.RED);
-                }
             }
         }
 
@@ -83,17 +74,14 @@ public class GameMap implements Serializable {
         walls[1] = new Wall(0, 0, panelWidth, wallWidth);
         walls[2] = new Wall(panelWidth-wallWidth, 0, wallWidth, panelHeight);
         walls[3] = new Wall(0, panelHeight-wallWidth, panelWidth, wallWidth);
-        walls[walls.length - 1].setColor(Color.RED);
 
         //ball
         ball = new Ball(120, 350, ballRadius);
         ball.setSpeedX(-3);
         ball.setSpeedY(-4);
-        ball.setColor(Color.MAGENTA);
 
         //the paddle
         paddle = new Paddle(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
-        paddle.setColor(Color.BLUE);
     }
 
     public void createCheckpoint() {

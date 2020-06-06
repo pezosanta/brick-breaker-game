@@ -7,7 +7,7 @@ public class Wall extends RectGameObject {
 
     public Wall(int x, int y, int width, int height) {
         super(x, y, width, height);
-        color = DEFAULT_COLOR;
+        setColor(DEFAULT_COLOR);
     }
 
     public Wall(int x, int y, int width, int height, Color color) {

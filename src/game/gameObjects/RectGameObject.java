@@ -26,8 +26,8 @@ public class RectGameObject extends GameObject {
 
     @Override
     public void draw(Graphics2D g) {
-        g.setColor(this.color);
-        g.fill(this.rect);
+        g.setColor(color);
+        g.fill(rect);
     }
 
     @Override

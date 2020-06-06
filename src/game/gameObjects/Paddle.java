@@ -1,6 +1,9 @@
 package game.gameObjects;
 
+import java.awt.*;
+
 public class Paddle extends RectGameObject {
+    public static final Color DEFAULT_COLOR = Color.BLUE;
     private int speedX;
 
     public int getSpeedX() {
@@ -12,12 +15,12 @@ public class Paddle extends RectGameObject {
     }
 
     public Paddle(int x, int y, int width, int height) {
-        super(x, y, width, height);
-        setSpeedX(0);
+        this(x, y, width, height, 0);
     }
 
     public Paddle(int x, int y, int width, int height, int speedX) {
         super(x, y, width, height);
         setSpeedX(speedX);
+        setColor(DEFAULT_COLOR);
     }
 }

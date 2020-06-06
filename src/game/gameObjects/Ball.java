@@ -3,6 +3,8 @@ package game.gameObjects;
 import java.awt.*;
 
 public class Ball extends CircularGameObject {
+    public static final Color DEFAULT_COLOR = Color.MAGENTA;
+
     private int speedX;
     private int speedY;
 
@@ -23,15 +25,14 @@ public class Ball extends CircularGameObject {
     }
 
     public Ball(int x, int y, int radius) {
-        super(x, y, radius);
-        setSpeedX(0);
-        setSpeedY(0);
+        this(x, y, radius, 0, 0);
     }
 
     public Ball(int x, int y, int radius, int speedX, int speedY) {
         super(x, y, radius);
         setSpeedX(speedX);
         setSpeedY(speedY);
+        setColor(DEFAULT_COLOR);
     }
 
     public void handleCollisionWith(RectGameObject rectObj) {
