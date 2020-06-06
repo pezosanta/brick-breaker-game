@@ -1,27 +1,25 @@
 package gui;
 
-import java.awt.Rectangle;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Font;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 
-public class multiplayerMenu extends Menu
+
+public class aboutMenu extends Menu
 {
-    private enum BUTTONSTATE {SERVERMODE, CLIENTMODE, BACK, OTHER};
+    private enum BUTTONSTATE {BACK, OTHER}
 
     private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
     private BUTTONSTATE buttonState                 = BUTTONSTATE.OTHER;
-    private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]
-            { BUTTONSTATE.SERVERMODE, BUTTONSTATE.CLIENTMODE, BUTTONSTATE.BACK, BUTTONSTATE.OTHER };
+    private final BUTTONSTATE[] buttonStateArray    = new BUTTONSTATE[]{BUTTONSTATE.BACK, BUTTONSTATE.OTHER};
 
-    private final int[] rectangleYArray             = new int[]{ 180, 235, 400 };
+    private final int[] rectangleYArray             = new int[]{400};
 
-    private final Rectangle serverModeButton = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle clientModeButton = new Rectangle(super.rectangleX, rectangleYArray[1], super.rectangleWidth, super.rectangleHeight);
-    private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[2], super.rectangleWidth, super.rectangleHeight);
+    private final Rectangle backButton              = new Rectangle(super.rectangleX, rectangleYArray[0], super.rectangleWidth, super.rectangleHeight);
 
-    public multiplayerMenu(){}
+    private final Rectangle aboutBackground         = new Rectangle(super.xTitle, super.yTitle + 60, 592, 195);
+
+    public aboutMenu() {}
 
     @Override
     public void render(Graphics g)
@@ -31,26 +29,10 @@ public class multiplayerMenu extends Menu
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setColor(super.inactiveColor);
-        g2d.fill(serverModeButton);
-        g2d.fill(clientModeButton);
         g2d.fill(backButton);
 
         switch(buttonState)
         {
-            case SERVERMODE:
-                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
-                else { g2d.setColor(super.activeColor); }
-
-                g2d.fill(serverModeButton);
-                break;
-
-            case CLIENTMODE:
-                if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
-                else { g2d.setColor(super.activeColor); }
-
-                g2d.fill(clientModeButton);
-                break;
-
             case BACK:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
@@ -60,17 +42,37 @@ public class multiplayerMenu extends Menu
 
             default:
                 g2d.setColor(super.inactiveColor);
-                g2d.fill(serverModeButton);
-                g2d.fill(clientModeButton);
                 g2d.fill(backButton);
         }
 
         Font fnt1 = new Font(super.fontStyle, Font.BOLD, super.fontSize);
         g.setFont(fnt1);
         g.setColor(super.fontColor);
-        g.drawString("Server mode", serverModeButton.x + 56, serverModeButton.y + 35);
-        g.drawString("Client mode", clientModeButton.x + 60, clientModeButton.y + 35);
         g.drawString("Back", backButton.x + 112, backButton.y + 35);
+
+        g2d.setColor(super.activeColor);
+        g2d.fill(aboutBackground);
+
+        Font fnt2 = new Font("Apple casual", Font.BOLD, 12);
+        g.setFont(fnt2);
+        g.setColor(super.fontColor);
+        g.drawString("This is a homework project of the \"Software Technology for Embedded Systems\" course at " +
+                "Budapest", aboutBackground.x + 10, aboutBackground.y + 20);
+        g.drawString("University of Technology and Economics. Our task was to create a JAVA based implementation "
+                + "of the", aboutBackground.x + 10, aboutBackground.y + 40);
+        g.drawString("so called Brick Breaker Game with both Single Player and real-time Multiplayer " +
+                "game mode options.", aboutBackground.x + 10, aboutBackground.y + 60);
+
+        g.drawString("Contributors:", aboutBackground.x + 10, aboutBackground.y + 100);
+        g.drawString("Tamas Horvath", aboutBackground.x + 250, aboutBackground.y + 100);
+        g.drawString("Peter Santa", aboutBackground.x + 260, aboutBackground.y + 120);
+        g.drawString("Marton Tim", aboutBackground.x + 261, aboutBackground.y + 140);
+
+        g.drawString("Advisor:", aboutBackground.x + 10, aboutBackground.y + 180);
+        g.drawString("Zsolt Karandi", aboutBackground.x + 258, aboutBackground.y + 180);
+
+        //g.drawString("Waiting for Client to connect: " + counter, backButton.x - 100, backButton.y - 200);
+        //g.drawString("Your IP address: " + ipAddress, backButton.x - 100, backButton.y - 130);
 
         clickedState = CLICKEDSTATE.OTHER;
     }
@@ -127,20 +129,6 @@ public class multiplayerMenu extends Menu
         if ((super.rectangleX + super.rectangleWidth) >= e.getX() && e.getX() >= super.rectangleX)
         {
             if ((rectangleYArray[0] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[0])
-            {
-                for (MenuListener hl : listeners)
-                {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SERVERMODE);
-                }
-            }
-            else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])
-            {
-                for (MenuListener hl : listeners)
-                {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.CLIENTMODE);
-                }
-            }
-            else if ((rectangleYArray[2] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[2])
             {
                 for (MenuListener hl : listeners)
                 {
