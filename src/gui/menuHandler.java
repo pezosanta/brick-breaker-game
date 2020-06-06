@@ -1,9 +1,13 @@
 package gui;
 
 import game.Gameplay;
+import networking.WallBreakerConnection;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public class menuHandler extends JPanel implements MenuListener
 {
@@ -33,7 +37,7 @@ public class menuHandler extends JPanel implements MenuListener
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        if (menuState == MENUSTATE.SINGLEPLAYER) { game.render(g); }
+        if (menuState == MENUSTATE.SINGLEPLAYER || menuState == MENUSTATE.MULTIPLAYERGAME) { game.render(g); }
         else { currentMenu.render(g); }
     }
 
@@ -92,7 +96,7 @@ public class menuHandler extends JPanel implements MenuListener
                 currentMenu = null;
                 break;
 
-            case MULTIPLAYER:
+            case MULTIPLAYER: {
                 menuState = MENUSTATE.MULTIPLAYER;
 
                 this.removeMouseListener(currentMenu);
@@ -101,7 +105,11 @@ public class menuHandler extends JPanel implements MenuListener
 
                 // Remove JTextField if added previously
                 Component[] componentList = this.getComponents();
-                for(Component c : componentList) { if(c instanceof JTextField){ this.remove(c); } }
+                for (Component c : componentList) {
+                    if (c instanceof JTextField) {
+                        this.remove(c);
+                    }
+                }
 
                 currentMenu = new multiplayerMenu();
                 currentMenu.addListener(this);
@@ -111,7 +119,7 @@ public class menuHandler extends JPanel implements MenuListener
 
                 repaint();
                 break;
-
+            }
             case ABOUT:
                 menuState = MENUSTATE.ABOUT;
 
@@ -200,6 +208,39 @@ public class menuHandler extends JPanel implements MenuListener
             case QUIT:
                 System.exit(0);
                 break;
+        }
+    }
+
+    @Override
+    public void mpSwitchHandler(MENUSTATE newMenuState, WallBreakerConnection wbConnection, boolean isServer) {
+        switch (newMenuState) {
+            case MULTIPLAYERGAME: {
+                menuState = MENUSTATE.MULTIPLAYERGAME;
+
+                this.removeMouseListener(currentMenu);
+                this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
+                // Remove JTextField if added previously
+                Component[] componentList = this.getComponents();
+                for (Component c : componentList) {
+                    if (c instanceof JTextField) {
+                        this.remove(c);
+                    }
+                }
+
+                game = new Gameplay(isServer, wbConnection.getInputStream(), wbConnection.getOutputStream());
+                game.addListener(this);
+
+                this.addKeyListener(game);
+
+                this.addMouseListener(currentMenu);
+                this.addMouseMotionListener(currentMenu);
+
+                repaint();
+                currentMenu = null;
+                break;
+            }
         }
     }
 }

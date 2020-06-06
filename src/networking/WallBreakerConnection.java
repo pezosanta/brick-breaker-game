@@ -24,7 +24,7 @@ public class WallBreakerConnection {
     }
 
     public Thread waitForConnection(Consumer<Boolean> connectionListener) {
-        return this.waitForConnection(connectionListener, 5000);
+        return this.waitForConnection(connectionListener, 120*1000);
     }
 
     public Thread waitForConnection(Consumer<Boolean> connectionListener, int timeout) {
@@ -36,7 +36,7 @@ public class WallBreakerConnection {
             try {
                 serverSocket.setSoTimeout(timeout);
                 socket = serverSocket.accept();
-                socket.setSoTimeout(10);
+                socket.setSoTimeout(50);
                 connectionListener.accept(true);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -89,6 +89,8 @@ public class WallBreakerConnection {
 
     public void close() {
         try {
+            if (serverSocket != null)
+                serverSocket.close();
             if (socket != null)
                 socket.close();
         } catch (IOException e) {

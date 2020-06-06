@@ -1,5 +1,7 @@
 package gui;
 
+import networking.WallBreakerConnection;
+
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.Graphics;
@@ -15,6 +17,9 @@ import java.awt.event.ActionListener;
 
 public class serverModeMenu extends Menu implements ActionListener
 {
+
+    private final WallBreakerConnection wbHost;
+
     private enum BUTTONSTATE {BACK, OTHER}
 
     private CLICKEDSTATE clickedState               = CLICKEDSTATE.OTHER;
@@ -30,11 +35,27 @@ public class serverModeMenu extends Menu implements ActionListener
     private int delay = 1000;
     private int counter = 60;
 
+    private Thread thost;
+
     public serverModeMenu()
     {
         ipAddress = getIPAddress();
         timer = new Timer(delay,this);
         timer.start();
+        wbHost = new WallBreakerConnection(true);
+        thost = wbHost.waitForConnection(this::connectionListener);
+    }
+
+    private void connectionListener(boolean hasConnected) {
+        timer.stop();
+
+        if (!hasConnected) {
+            wbHost.close();
+        } else {
+            // Connection successful
+            listeners.forEach(menuListener -> menuListener.mpSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYERGAME,
+                    wbHost, true));
+        }
     }
 
     private String getIPAddress()
@@ -160,9 +181,10 @@ public class serverModeMenu extends Menu implements ActionListener
         {
             if ((rectangleYArray[0] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[0])
             {
+                timer.stop();
+                wbHost.close();
                 for (MenuListener hl : listeners)
                 {
-                    timer.stop();
                     hl.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER);
                 }
             }
@@ -182,9 +204,10 @@ public class serverModeMenu extends Menu implements ActionListener
         }
         else
         {
+            timer.stop();
+            wbHost.close();
             for (MenuListener hl : listeners)
             {
-                timer.stop();
                 hl.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER);
             }
         }

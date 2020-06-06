@@ -1,5 +1,7 @@
 package gui;
 
+import networking.WallBreakerConnection;
+
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.Graphics;
@@ -8,6 +10,8 @@ import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -187,6 +191,23 @@ public class clientModeMenu extends Menu implements ActionListener
             startConnecting = true;
             timer.start();
             System.out.println(ipTextField.getText());
+            WallBreakerConnection wbclient = new WallBreakerConnection(false);
+            try {
+                InetAddress hostAddress = InetAddress.getByName(ipTextField.getText());
+                boolean success = wbclient.connect(hostAddress);
+                timer.stop();
+                if (success) { //csatlakoztunk
+                    listeners.forEach(menuListener -> menuListener.mpSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYERGAME,
+                            wbclient, false));
+                } else { //nem sikerult
+                    System.out.println("Connection to host failed.");
+                    listeners.forEach(menuListener -> menuListener.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER));
+                }
+            } catch (UnknownHostException unknownHostException) {
+                unknownHostException.printStackTrace();
+                timer.stop();
+                listeners.forEach(menuListener -> menuListener.menuSwitchHandler(menuHandler.MENUSTATE.MULTIPLAYER));
+            }
         }
     }
 

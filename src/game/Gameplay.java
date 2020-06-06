@@ -43,7 +43,7 @@ public class Gameplay implements KeyListener, ActionListener {
     private GameMap map;
     private Queue<WBMessage> myEvents = new LinkedList<>();
 
-    private Random random;
+    private Random random = new Random();
 
     private java.util.List<MenuListener> listeners = new ArrayList<MenuListener>();
     public void addListener(MenuListener listenerToAdd)
@@ -57,7 +57,6 @@ public class Gameplay implements KeyListener, ActionListener {
         } else {
             map = new GameMap();
         }
-        random = new Random();
 
         timer = new Timer(delay,this);
         timer.start();
@@ -67,18 +66,20 @@ public class Gameplay implements KeyListener, ActionListener {
         this(null);
     }
 
-    public Gameplay(boolean isServer, ObjectInputStream inStream, ObjectOutputStream outStream) {
-        this();
-        this.isMultiplayer = true;
+    public Gameplay(boolean isServer, InputStream inStream, OutputStream outStream) {
         this.isServer = isServer;
-        this.wbProtocol = new WallBreakerProtocol(inStream, outStream);
+        map = new GameMap();
+        timer = new Timer(delay,this);
+        isMultiplayer = true;
+
+        wbProtocol = new WallBreakerProtocol(inStream, outStream);
 
         if (isServer) {
             boolean success = wbProtocol.sendMessage(new WBMessage(MAP, map));
             if (!success) throw new RuntimeException("Failed to send map!");
 
             WBMessage msg = wbProtocol.readMessage();
-            if (msg.msg != OK) {
+            if (msg == null || msg.msg != OK) {
                 System.out.println(msg.toString());
                 throw new RuntimeException("Client failed to respond properly!");
             }
@@ -95,6 +96,9 @@ public class Gameplay implements KeyListener, ActionListener {
                 throw new RuntimeException("Could not receive GameMap object from server! Aborting...");
             }
         }
+
+        System.out.println("Multiplayer Gameplay initialized as: " + this.isServer);
+        timer.start();
     }
 
     public static Gameplay startFromCheckpoint() {
