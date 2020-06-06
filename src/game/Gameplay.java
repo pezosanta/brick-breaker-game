@@ -21,8 +21,9 @@ import static networking.WBMessage.MsgType.*;
 
 public class Gameplay implements KeyListener, ActionListener {
 
-    private boolean play = false;
-    private boolean firstRun = true;
+    private boolean isStarted = false;
+    private boolean isEnded = false;
+
     private boolean isMultiplayer = false;
     private boolean isServer = true;
     private WallBreakerProtocol wbProtocol;
@@ -125,20 +126,21 @@ public class Gameplay implements KeyListener, ActionListener {
         g.setFont(new Font("serif",Font.BOLD,25));
         g.drawString(""+score,map.panelWidth*4/5,25+2*map.wallWidth);
 
-        if (!play && map.getAvailableBricks() <= 0) {
+        if (isEnded) {
             g.setColor(Color.RED);
-            g.setFont(new Font("serif",Font.BOLD,30));
-            g.drawString("You Won!",260,300);
+            if (map.getAvailableBricks() == 0) {
+                g.setFont(new Font("serif", Font.BOLD, 30));
+                g.drawString("You Won!", 260, 300);
+            } else {
+                g.setFont(new Font("serif",Font.BOLD,25));
+                g.drawString("Game Over, Your score: " + String.valueOf(score),190,300);
+            }
 
             g.setFont(new Font("serif",Font.BOLD,20));
             g.drawString("Press Enter to Restart",230,350);
-        } else if (!play && !firstRun){
-            g.setColor(Color.RED);
-            g.setFont(new Font("serif",Font.BOLD,25));
-            g.drawString("Game Over, Your score: " + String.valueOf(score),190,300);
-
-            g.setFont(new Font("serif",Font.BOLD,25));
-            g.drawString("Press Enter to Restart",230,350);
+        } else if (!isStarted) {
+            g.setFont(new Font("serif",Font.BOLD,20));
+            g.drawString("Press arrow to start",230,350);
         }
 
         g.dispose();
@@ -146,7 +148,7 @@ public class Gameplay implements KeyListener, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (play) {
+        if (isStarted && !isEnded) {
             step();
         }
 
@@ -161,8 +163,7 @@ public class Gameplay implements KeyListener, ActionListener {
             moveBallAndPaddle();
             boolean hitBottomWall = handleCollisions();
             if (hitBottomWall || map.getAvailableBricks() == 0) {
-                play = false;
-                firstRun = false;
+                isEnded = true;
             }
             if (isMultiplayer) {
                 boolean success = wbProtocol.sendMessage(new WBMessage(MAP, map));
@@ -188,9 +189,12 @@ public class Gameplay implements KeyListener, ActionListener {
                         break;
                     case GAME_FINISHED:
                         // TODO: show highscore, stop game
+                        stop();
+                        isEnded = true;
                     default:
                     case EXITED:
                         stop();
+                        isEnded = true;
                         // TODO: show message that connection was lost
                         System.out.println("Server has exited the game.");
                         listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
@@ -280,9 +284,10 @@ public class Gameplay implements KeyListener, ActionListener {
             moveLeft();
         }
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            if (!play) {
+            if (isEnded) {
                 map.reset();
-                play = true;
+                isStarted = false;
+                isEnded = false;
                 score = 0;
 
                 for (MenuListener hl : listeners)
@@ -302,15 +307,15 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     public void stopMove(){
-        if (firstRun == true){
-            play = true;
+        if (isEnded == false){
+            isStarted = true;
         }
         map.paddle.setSpeedX(0);
     }
 
     public void moveRight(){
-        if (firstRun == true){
-            play = true;
+        if (isEnded == false){
+            isStarted = true;
         }
         if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
             map.paddle.setSpeedX(paddleSpeed);
@@ -318,8 +323,8 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     public void moveLeft(){
-        if (firstRun == true){
-            play = true;
+        if (isEnded == false){
+            isStarted = true;
         }
         if (map.paddle.getPosition().x > (map.wallWidth)) {
             map.paddle.setSpeedX(-paddleSpeed);
