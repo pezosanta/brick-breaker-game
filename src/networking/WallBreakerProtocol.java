@@ -1,5 +1,7 @@
 package networking;
 
+import game.GameMap;
+
 import java.io.*;
 import java.net.InetAddress;
 import java.util.function.Consumer;
@@ -81,7 +83,14 @@ public class WallBreakerProtocol {
                         if (msg == null) msg = new WBMessage(WBMessage.MsgType.EXITED, "");
 
                         System.out.println("Message type: " + msg.msg);
-                        System.out.println("Message payload: " + msg.payload);
+                        switch (msg.msg) {
+                            case OK:
+                                System.out.println("Message payload: " + msg.payload);
+                                break;
+                            case MAP:
+                                System.out.println("Message payload: " + ((GameMap)msg.payload).getClass());
+                                break;
+                        }
                         if (msg.msg == WBMessage.MsgType.EXITED) break;
                     }
                 }
@@ -109,6 +118,7 @@ public class WallBreakerProtocol {
                 String messagePayload = ("" + i + ". számú üzenet.");
                 wbProtocol.sendMessage(new WBMessage(WBMessage.MsgType.OK, messagePayload));
             }
+            wbProtocol.sendMessage(new WBMessage(WBMessage.MsgType.MAP, new GameMap()));
             wbProtocol.sendMessage(new WBMessage(WBMessage.MsgType.EXITED, "exit"));
 
             System.out.println("Client: Messages sent.");
