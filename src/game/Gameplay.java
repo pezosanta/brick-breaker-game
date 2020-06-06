@@ -358,25 +358,16 @@ public class Gameplay implements KeyListener, ActionListener {
     }
 
     public void stopMove(){
-        if (!isEnded){
-            isStarted = true;
-        }
         map.paddle.setSpeedX(0);
     }
 
     public void moveRight(){
-        if (!isEnded){
-            isStarted = true;
-        }
         if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
             map.paddle.setSpeedX(paddleSpeed);
         }
     }
 
     public void moveLeft(){
-        if (!isEnded){
-            isStarted = true;
-        }
         if (map.paddle.getPosition().x > (map.wallWidth)) {
             map.paddle.setSpeedX(-paddleSpeed);
         }
