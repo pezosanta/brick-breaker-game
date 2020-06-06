@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class WallBreakerConnection {
     static final int PORT = 31013;
@@ -21,19 +23,27 @@ public class WallBreakerConnection {
         }
     }
 
-    public boolean waitForConnection() {
+    public Thread waitForConnection(Consumer<Boolean> connectionListener) {
+        return this.waitForConnection(connectionListener, 5000);
+    }
+
+    public Thread waitForConnection(Consumer<Boolean> connectionListener, int timeout) {
         if (serverSocket == null) {
             throw new RuntimeException("This object is not initialized as server!");
         }
 
-        try {
-            //serverSocket.setSoTimeout(10000);
-            socket = serverSocket.accept();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        Thread t = new Thread(() -> {
+            try {
+                serverSocket.setSoTimeout(timeout);
+                socket = serverSocket.accept();
+                connectionListener.accept(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+                connectionListener.accept(false);
+            }
+        });
+        t.start();
+        return t;
     }
 
     public boolean connect(InetAddress ipAddress) {
@@ -93,11 +103,11 @@ public class WallBreakerConnection {
         WallBreakerConnection wbclient = new WallBreakerConnection(false);
         InetAddress hostAddress = wbhost.getAddress();
 
-        Thread thost = new Thread(new Runnable() {
+        Consumer<Boolean> connectionListener = new Consumer<Boolean>() {
             @Override
-            public void run() {
-                boolean success = wbhost.waitForConnection();
+            public void accept(Boolean success) {
                 System.out.println("Connection at host side was successful: " + success);
+                if (!success) return;
 
                 try (ObjectInputStream inStream = new ObjectInputStream(wbhost.getInputStream())) {
                     System.out.println("Trying to get messages...");
@@ -118,33 +128,31 @@ public class WallBreakerConnection {
 
                 wbhost.close();
             }
-        });
-        Thread tclient = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                boolean success = wbclient.connect(hostAddress);
-                System.out.println("Connection at client side was successful: " + success);
+        };
 
-                try {
-                    ObjectOutputStream outStream = new ObjectOutputStream(wbclient.getOutputStream());
-                    for (int i = 0; i < 5; i++) {
-                        outStream.writeUTF("" + i + ". számú üzenet.");
-                    }
-                    outStream.writeUTF("exit");
-                    outStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        Thread tclient = new Thread(() -> {
+            boolean success = wbclient.connect(hostAddress);
+            System.out.println("Connection at client side was successful: " + success);
+
+            try {
+                ObjectOutputStream outStream = new ObjectOutputStream(wbclient.getOutputStream());
+                for (int i = 0; i < 5; i++) {
+                    outStream.writeUTF("" + i + ". számú üzenet.");
                 }
-
-                wbclient.close();
+                outStream.writeUTF("exit");
+                outStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
+            wbclient.close();
         });
 
-        thost.start();
-        tclient.start();
+        wbhost.waitForConnection(connectionListener);
+        //tclient.start();
 
         try {
-            thost.join();
+            //thost.join();
             tclient.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
