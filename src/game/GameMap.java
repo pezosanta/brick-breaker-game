@@ -214,13 +214,13 @@ public class GameMap implements Serializable {
             return new GameMap();
         }
 
-        GameMap mapgen = new GameMap();
-        for (int i=0; i<mapgen.bricks.length; i++) {
-            for (int j=0; j< mapgen.bricks[i].length; j++) {
-                mapgen.bricks[i][j].setHealth(values.get(i*cols + j));
+        int[][] healths = new int[ROWS][COLS];
+        for (int i=0; i<healths.length; i++) {
+            for (int j=0; j< healths[i].length; j++) {
+                healths[i][j] = values.get(i*cols + j);
             }
         }
 
-        return mapgen;
+        return new GameMap(healths);
     }
 }
