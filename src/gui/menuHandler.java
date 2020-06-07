@@ -75,6 +75,28 @@ public class menuHandler extends JPanel implements MenuListener
                 repaint();
                 break;
 
+            case SINGLEPLAYER:
+                menuState = MENUSTATE.SINGLEPLAYER;
+
+                this.removeMouseListener(currentMenu);
+                this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
+                //game = new Gameplay();
+                game = Gameplay.startFromCheckpoint();
+                game.addListener(this);
+
+                this.addKeyListener(game);
+
+                this.setFocusable(true);
+                this.requestFocusInWindow();
+                this.setFocusTraversalKeysEnabled(false);
+
+                repaint();
+
+                currentMenu = null;
+                break;
+
             case MULTIPLAYER: {
                 menuState = MENUSTATE.MULTIPLAYER;
 

@@ -87,10 +87,15 @@ public class mapChooserMenu extends Menu implements ActionListener
             e.printStackTrace();
         }
 
-        File folderPath = new File(path);
-        String[] mapPaths = folderPath.list();
+        File mapFiles = new File(path);
+        String[] mapFilesList = mapFiles.list();
 
-        return new ArrayList<>(Arrays.asList(mapPaths));
+        for(int i=0; i< mapFilesList.length; i++)
+        {
+            mapFilesList[i] = path + "/" + mapFilesList[i];
+        }
+
+        return new ArrayList<>(Arrays.asList(mapFilesList));
     }
 
     @Override
