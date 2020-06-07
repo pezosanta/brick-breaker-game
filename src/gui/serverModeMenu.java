@@ -14,6 +14,7 @@ import java.net.*;
 import java.io.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Enumeration;
 
 public class serverModeMenu extends Menu implements ActionListener
 {
@@ -58,38 +59,39 @@ public class serverModeMenu extends Menu implements ActionListener
         }
     }
 
-    private String getIPAddress()
-    {
-
-        try
-        {
-            InetAddress inetAddress = InetAddress.getLocalHost();
-            //System.out.println("IP Address:- " + inetAddress.getHostAddress());
-            //System.out.println("Host Name:- " + inetAddress.getHostName());
-            return inetAddress.getHostAddress();
+    private String getIPAddress() {
+        try {
+            return getFirstNonLoopbackAddress(true, false).getHostAddress();
+        } catch (SocketException e) {
+            e.printStackTrace();
+            return "";
         }
-        catch(java.net.UnknownHostException e)
-        {
-            //System.out.println("You are not connected to the internet!");
-            return "You are not connected to the internet!";
-        }
+    }
 
-        /*
-        try
-        {
-            URL url_name = new URL("http://bot.whatismyipaddress.com");
-
-            BufferedReader sc =
-                    new BufferedReader(new InputStreamReader(url_name.openStream()));
-
-            // reads system IPAddress
-            return sc.readLine().trim();
+    // from: https://stackoverflow.com/a/901943
+    private static InetAddress getFirstNonLoopbackAddress(boolean preferIpv4, boolean preferIPv6) throws SocketException {
+        Enumeration en = NetworkInterface.getNetworkInterfaces();
+        while (en.hasMoreElements()) {
+            NetworkInterface i = (NetworkInterface) en.nextElement();
+            for (Enumeration en2 = i.getInetAddresses(); en2.hasMoreElements();) {
+                InetAddress addr = (InetAddress) en2.nextElement();
+                if (!addr.isLoopbackAddress()) {
+                    if (addr instanceof Inet4Address) {
+                        if (preferIPv6) {
+                            continue;
+                        }
+                        return addr;
+                    }
+                    if (addr instanceof Inet6Address) {
+                        if (preferIpv4) {
+                            continue;
+                        }
+                        return addr;
+                    }
+                }
+            }
         }
-        catch (Exception e)
-        {
-            return "Cannot Execute Properly";
-        }
-         */
+        return null;
     }
 
     @Override
