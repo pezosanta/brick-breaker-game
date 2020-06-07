@@ -75,7 +75,9 @@ public class mapChooserMenu extends Menu implements ActionListener
 
     public ArrayList<String> getAvailableMaps()
     {
-        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        //ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+
+        ClassLoader classloader = this.getClass().getClassLoader();
         String path = classloader.getResource("maps").getPath();
 
         try
@@ -89,11 +91,13 @@ public class mapChooserMenu extends Menu implements ActionListener
 
         File mapFiles = new File(path);
         String[] mapFilesList = mapFiles.list();
-
+        /*
         for(int i=0; i< mapFilesList.length; i++)
         {
             mapFilesList[i] = path + "/" + mapFilesList[i];
         }
+
+         */
 
         return new ArrayList<>(Arrays.asList(mapFilesList));
     }
