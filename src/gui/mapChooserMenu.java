@@ -5,7 +5,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class mapChooserMenu extends Menu implements ActionListener
@@ -65,6 +68,14 @@ public class mapChooserMenu extends Menu implements ActionListener
         }
 
         return textWidths;
+    }
+
+    public ArrayList<String> getAvailableMaps() {
+
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        URL mapsPath = classloader.getResource("maps");
+
+        return new ArrayList<>(Arrays.asList(new File(mapsPath.getPath()).list()));
     }
 
     @Override
@@ -194,9 +205,13 @@ public class mapChooserMenu extends Menu implements ActionListener
         {
             if ((rectangleYArray[0] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[0])
             {
+                String filePath = "./resources/maps/sparse.csv";
+                //System.out.println(getAvailableMaps());
+                ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+                InputStream fileStream = classloader.getResourceAsStream(getAvailableMaps().get(0));
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.spSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER, fileStream);
                 }
             }
             else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])

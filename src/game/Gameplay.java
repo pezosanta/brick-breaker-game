@@ -55,6 +55,7 @@ public class Gameplay implements KeyListener, ActionListener {
         if (in != null) {
             map = GameMap.loadMapFromCSV(in);
         } else {
+            System.out.println("nem jó baszod");
             map = new GameMap();
         }
 
