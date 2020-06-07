@@ -79,6 +79,7 @@ public class Gameplay implements KeyListener, ActionListener {
 
         if (isServer) {
             map = new GameMap();
+            map.addSecondPaddle();
             lastSentMessage = new WBMessage(MAP, map);
             boolean success = wbProtocol.sendMessage(lastSentMessage);
             if (!success) throw new RuntimeException("Failed to send map!");
@@ -171,25 +172,16 @@ public class Gameplay implements KeyListener, ActionListener {
                     WBMessage msg = myEvents.poll();
                     switch (msg.msg) {
                         case PLAYER_RELEASED:
-                            stopMove();
-                            break;
-                        case PLAYER_RELEASED2:
-                            stopMove2();
+                            stopMove(1);
                             break;
                         case PLAYER_PRESSED:
                             isReady = true;
                             switch ((int) msg.keyCode) {
                                 case KeyEvent.VK_LEFT:
-                                    moveLeft();
+                                    moveLeft(1);
                                     break;
                                 case KeyEvent.VK_RIGHT:
-                                    moveRight();
-                                    break;
-                                case KeyEvent.VK_A:
-                                    moveLeft2();
-                                    break;
-                                case KeyEvent.VK_D:
-                                    moveRight2();
+                                    moveRight(1);
                                     break;
                             }
                     }
@@ -206,18 +198,15 @@ public class Gameplay implements KeyListener, ActionListener {
                                 isClientReady = true;
                                 switch ((int) lastReadMessage.keyCode) {
                                     case KeyEvent.VK_LEFT:
-                                        moveLeft();
+                                        moveLeft(2);
                                         break;
                                     case KeyEvent.VK_RIGHT:
-                                        moveRight();
+                                        moveRight(2);
                                         break;
                                 }
                                 break;
                             case PLAYER_RELEASED:
-                                stopMove();
-                                break;
-                            case PLAYER_RELEASED2:
-                                stopMove2();
+                                stopMove(2);
                                 break;
                             case PLAYER_READY:
                                 isClientReady = true;
@@ -246,9 +235,11 @@ public class Gameplay implements KeyListener, ActionListener {
                 if (isStarted && !isEnded) {
                     step();
 
-                    // Send updated game map to client
+                    // Send updated game map and score to client
                     if (isMultiplayer) {
                         lastSentMessage = new WBMessage(MAP, new GameMap(map));
+                        wbProtocol.sendMessage(lastSentMessage);
+                        lastSentMessage = new WBMessage(NEW_SCORE, score);
                         wbProtocol.sendMessage(lastSentMessage);
                         if (isEnded) { // This was the last step we took
                             lastSentMessage = new WBMessage(GAME_FINISHED, null);
@@ -271,6 +262,9 @@ public class Gameplay implements KeyListener, ActionListener {
                                 throw new RuntimeException("Received GameMap is null!");
                             }
                             map = lastReadMessage.map;
+                            break;
+                        case NEW_SCORE:
+                            score = lastReadMessage.keyCode;
                             break;
                         case GAME_STARTED:
                             isStarted = true;
@@ -296,12 +290,6 @@ public class Gameplay implements KeyListener, ActionListener {
                 }
             }
 
-            // TODO: ez kell?
-            if (!isMultiplayer && isEnded) {
-                // Process client messages
-                stop();
-            }
-
             // Draw game (calls this.render implicitly)
             listeners.forEach(menuListener -> menuListener.gamePaintHandler());
         }
@@ -324,26 +312,30 @@ public class Gameplay implements KeyListener, ActionListener {
 
         Point paddlepos = map.paddle.getPosition();
         paddlepos.x += map.paddle.getSpeedX();
-        if (paddlepos.x > (map.panelWidth - map.paddle.getRect().width-map.wallWidth)) {
-            stopMove();
+        if (paddlepos.x > (map.panelWidth - map.paddle.getRect().width-map.wallWidth)) { // Right wall check
+            stopMove(1);
             paddlepos.x = map.panelWidth - map.paddle.getRect().width-map.wallWidth;
-        } else if (paddlepos.x < map.panelWidth/2) {
-            stopMove();
-            paddlepos.x = map.panelWidth/2;
+        } else if (!isMultiplayer && paddlepos.x < map.wallWidth) { // Left wall check
+            stopMove(1);
+            paddlepos.x = map.wallWidth;
+        } else if (isMultiplayer && paddlepos.x < map.panelWidth / 2) { // Middle point check (MP)
+            stopMove(1);
+            paddlepos.x = map.panelWidth / 2;
         }
         map.paddle.setPosition(paddlepos);
 
-        Point paddlepos2 = map.paddle2.getPosition();
-        paddlepos2.x += map.paddle2.getSpeedX();
-        if (paddlepos2.x > (map.panelWidth/2 - map.paddle2.getRect().width)) {
-            stopMove();
-            paddlepos2.x = map.panelWidth/2 - map.paddle2.getRect().width;
+        if (isMultiplayer) {
+            Point paddlepos2 = map.paddle2.getPosition();
+            paddlepos2.x += map.paddle2.getSpeedX();
+            if (paddlepos2.x > (map.panelWidth / 2 - map.paddle2.getRect().width)) {
+                stopMove(2);
+                paddlepos2.x = map.panelWidth / 2 - map.paddle2.getRect().width;
+            } else if (paddlepos2.x < map.wallWidth) {
+                stopMove(2);
+                paddlepos2.x = map.wallWidth;
+            }
+            map.paddle2.setPosition(paddlepos2);
         }
-        else if (paddlepos2.x < map.wallWidth) {
-            stopMove();
-            paddlepos2.x = map.wallWidth;
-        }
-        map.paddle2.setPosition(paddlepos2);
     }
 
     private boolean handleCollisions() {
@@ -398,10 +390,6 @@ public class Gameplay implements KeyListener, ActionListener {
             case KeyEvent.VK_LEFT:
                 myEvents.add(new WBMessage(PLAYER_RELEASED, e.getKeyCode()));
                 break;
-            case KeyEvent.VK_A:
-            case KeyEvent.VK_D:
-                myEvents.add(new WBMessage(PLAYER_RELEASED2, e.getKeyCode()));
-                break;
             default:
                 break;
         }
@@ -450,35 +438,44 @@ public class Gameplay implements KeyListener, ActionListener {
         }
     }
 
-    public void stopMove(){
-        map.paddle.setSpeedX(0);
-    }
-
-    public void stopMove2(){
-        map.paddle2.setSpeedX(0);
-    }
-
-    public void moveRight(){
-        if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
-            map.paddle.setSpeedX(paddleSpeed);
+    public void stopMove(int paddleIdx) {
+        switch (paddleIdx) {
+            case 1:
+                map.paddle.setSpeedX(0);
+                break;
+            case 2:
+                map.paddle2.setSpeedX(0);
+                break;
         }
     }
 
-    public void moveLeft(){
-        if (map.paddle.getPosition().x > (map.wallWidth)) {
-            map.paddle.setSpeedX(-paddleSpeed);
+    public void moveRight(int paddleIdx) {
+        switch (paddleIdx) {
+            case 1:
+                if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
+                    map.paddle.setSpeedX(paddleSpeed);
+                }
+                break;
+            case 2:
+                if (map.paddle2.getPosition().x < (map.panelWidth - map.paddle2.getRect().width - map.wallWidth)) {
+                    map.paddle2.setSpeedX(paddleSpeed);
+                }
+                break;
         }
     }
 
-    public void moveRight2(){
-        if (map.paddle2.getPosition().x < (map.panelWidth - map.paddle2.getRect().width - map.wallWidth)) {
-            map.paddle2.setSpeedX(paddleSpeed);
-        }
-    }
-
-    public void moveLeft2(){
-        if (map.paddle2.getPosition().x > (map.wallWidth)) {
-            map.paddle2.setSpeedX(-paddleSpeed);
+    public void moveLeft(int paddleIdx) {
+        switch (paddleIdx) {
+            case 1:
+                if (map.paddle.getPosition().x > (map.wallWidth)) {
+                    map.paddle.setSpeedX(-paddleSpeed);
+                }
+                break;
+            case 2:
+                if (map.paddle2.getPosition().x > (map.wallWidth)) {
+                    map.paddle2.setSpeedX(-paddleSpeed);
+                }
+                break;
         }
     }
 
