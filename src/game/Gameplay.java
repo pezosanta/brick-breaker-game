@@ -189,8 +189,12 @@ public class Gameplay implements KeyListener, ActionListener {
                         case PLAYER_PRESSED:
                         case PLAYER_RELEASED:
                         case PLAYER_READY:
-                        case EXITED:
                             break;
+                        case EXITED:
+                            stop();
+                            System.out.println("Client has exited the game.");
+                            listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
+                            return;
                     }
                 }
             }
@@ -230,7 +234,6 @@ public class Gameplay implements KeyListener, ActionListener {
                     case EXITED:
                         stop();
                         isEnded = true;
-                        // TODO: show message that connection was lost
                         System.out.println("Server has exited the game.");
                         listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
                         return;
