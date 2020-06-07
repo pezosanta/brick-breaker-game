@@ -29,6 +29,7 @@ public class Gameplay implements KeyListener, ActionListener {
 
     private boolean isMultiplayer = false;
     private boolean isServer = true;
+    private boolean isClientReady = false;
     private WallBreakerProtocol wbProtocol;
 
     private int score = 0;
@@ -37,8 +38,9 @@ public class Gameplay implements KeyListener, ActionListener {
     private int paddleSizeCounter = 0;
     private int maxPowerUpLevel = 3;
 
+    private Boolean isLoopExecuting = false;
     private Timer timer;
-    private int delay = 160;
+    private int delay = 32;
 
     private GameMap map;
     private Queue<WBMessage> myEvents = new ConcurrentLinkedQueue<>();
@@ -114,7 +116,7 @@ public class Gameplay implements KeyListener, ActionListener {
         timer.stop();
         if (!isMultiplayer) {
             map.createCheckpoint();
-        } else {
+        } else if (wbProtocol != null && isLoopExecuting == false) {
             wbProtocol.sendMessage(new WBMessage(EXITED, null));
             wbProtocol.close();
             wbProtocol = null;
@@ -156,99 +158,124 @@ public class Gameplay implements KeyListener, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // Do server things: process own key events, process client messages, step gameplay, send map to client (and maybe control)
-        if (isServer) {
-            // Process own key events
-            while (!myEvents.isEmpty()) {
-                WBMessage msg = myEvents.poll();
-                switch (msg.msg) {
-                    case PLAYER_RELEASED:
-                        stopMove();
-                        break;
-                    case PLAYER_PRESSED:
-                        isReady = true;
-                        switch ((int) msg.payload) {
-                            case KeyEvent.VK_LEFT:
-                                moveLeft();
-                                break;
-                            case KeyEvent.VK_RIGHT:
-                                moveRight();
-                                break;
-                        }
-                }
-            }
-
-            // TODO: process client events if multiplayer
-            if (isMultiplayer && !isEnded) {
-                // Process client messages
-                while (wbProtocol.isDataAvailable()) {
-                    System.out.println("Client message received!");
-                    WBMessage msg = wbProtocol.readMessage();
-                    if (msg == null) msg = new WBMessage(EXITED, null);
+        synchronized (isLoopExecuting) {
+            // Do server things: process own key events, process client messages, step gameplay, send map to client (and maybe control)
+            if (isServer) {
+                // Process own key events
+                while (!myEvents.isEmpty()) {
+                    WBMessage msg = myEvents.poll();
                     switch (msg.msg) {
-                        case PLAYER_PRESSED:
                         case PLAYER_RELEASED:
-                        case PLAYER_READY:
+                            stopMove();
                             break;
-                        case EXITED:
-                            stop();
-                            System.out.println("Client has exited the game.");
-                            listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
-                            return;
+                        case PLAYER_PRESSED:
+                            isReady = true;
+                            switch ((int) msg.payload) {
+                                case KeyEvent.VK_LEFT:
+                                    moveLeft();
+                                    break;
+                                case KeyEvent.VK_RIGHT:
+                                    moveRight();
+                                    break;
+                            }
+                    }
+                }
+
+                // TODO: process client events if multiplayer
+                if (isMultiplayer && !isEnded) {
+                    // Process client messages
+                    while (wbProtocol.isDataAvailable()) {
+                        System.out.println("Client message received!");
+                        WBMessage msg = wbProtocol.readMessage();
+                        if (msg == null) msg = new WBMessage(EXITED, null);
+                        switch (msg.msg) {
+                            case PLAYER_PRESSED:
+                                isClientReady = true;
+                                break;
+                            case PLAYER_RELEASED:
+                                break;
+                            case PLAYER_READY:
+                                isClientReady = true;
+                                break;
+                            case EXITED:
+                                stop();
+                                System.out.println("Client has exited the game.");
+                                listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
+                                return;
+                        }
+                    }
+                }
+
+                // If players are ready: start game!
+                if (isReady) {
+                    if (!isMultiplayer) {
+                        isStarted = true;
+                    } else if (isMultiplayer && isClientReady) {
+                        isStarted = true;
+                        wbProtocol.sendMessage(new WBMessage(GAME_STARTED, null));
+                    }
+                }
+
+                // Update game map if play is started but not ended
+                if (isStarted && !isEnded) {
+                    step();
+
+                    // Send updated game map to client
+                    if (isMultiplayer) {
+                        WBMessage msg = new WBMessage(MAP, this.map);
+                        wbProtocol.sendMessage(msg);
+                        System.out.println("sent msg id = " + msg.id);
+                        System.out.println("sent ballpos = " + ((GameMap)msg.payload).ball.getPosition());
+                        if (isEnded) { // This was the last step we took
+                            wbProtocol.sendMessage(new WBMessage(GAME_FINISHED, null));
+                        }
                     }
                 }
             }
 
-            // If players are ready: start game!
-            if (isReady) isStarted = true;
-
-            // Update game map if play is started but not ended
-            if (isStarted && !isEnded) {
-                step();
-
-                // Send updated game map to client
-                if (isMultiplayer) {
-                    wbProtocol.sendMessage(new WBMessage(MAP, map));
-                }
-            }
-        }
-
-        // We are multiplayer client; receive map from server, send user inputs to server
-        if (isMultiplayer && !isServer && !isEnded) {
-            // Process server messages
-            while (wbProtocol.isDataAvailable()) {
-                WBMessage msg = wbProtocol.readMessage();
-                if (msg == null) msg = new WBMessage(EXITED, null);
-                switch (msg.msg) {
-                    case MAP:
-                        if (msg.payload == null) {
+            // We are multiplayer client; receive map from server, send user inputs to server
+            if (isMultiplayer && !isServer && !isEnded) {
+                // Process server messages
+                while (wbProtocol.isDataAvailable()) {
+                    WBMessage msg = wbProtocol.readMessage();
+                    if (msg == null) msg = new WBMessage(EXITED, null);
+                    switch (msg.msg) {
+                        case MAP:
+                            if (msg.payload == null) {
+                                stop();
+                                throw new RuntimeException("Received GameMap is null!");
+                            }
+                            map = (GameMap) msg.payload;
+                            System.out.println("CLIENT: Map received! ID is: " + msg.id);
+                            System.out.println("received ballpos = " + map.ball.getPosition());
+                            break;
+                        case GAME_STARTED:
+                            isStarted = true;
+                            break;
+                        case GAME_FINISHED:
                             stop();
-                            throw new RuntimeException("Received GameMap is null!");
-                        }
-                        map = (GameMap) msg.payload;
-                        break;
-                    case GAME_FINISHED:
-                        stop();
-                        isEnded = true;
-                    default:
-                    case EXITED:
-                        stop();
-                        isEnded = true;
-                        System.out.println("Server has exited the game.");
-                        listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
-                        return;
+                            isEnded = true;
+                            break;
+                        default:
+                        case EXITED:
+                            stop();
+                            isEnded = true;
+                            System.out.println("Server has exited the game.");
+                            listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
+                            return;
+                    }
+                }
+
+                // Send player control input to server
+                while (!myEvents.isEmpty()) {
+                    System.out.println("Client event sent!");
+                    wbProtocol.sendMessage(myEvents.poll());
                 }
             }
 
-            // Send player control input to server
-            while (!myEvents.isEmpty()) {
-                System.out.println("Client event sent!");
-                wbProtocol.sendMessage(myEvents.poll());
-            }
+            // Draw game (calls this.render implicitly)
+            listeners.forEach(menuListener -> menuListener.gamePaintHandler());
         }
-
-        // Draw game (calls this.render implicitly)
-        listeners.forEach(menuListener -> menuListener.gamePaintHandler());
     }
 
     private void step() {
