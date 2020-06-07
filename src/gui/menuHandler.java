@@ -5,8 +5,8 @@ import networking.WallBreakerConnection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -213,9 +213,40 @@ public class menuHandler extends JPanel implements MenuListener
     }
 
     @Override
-    public void mpSwitchHandler(MENUSTATE newMenuState, WallBreakerConnection wbConnection, boolean isServer) {
-        switch (newMenuState) {
-            case MULTIPLAYERGAME: {
+    public void spSwitchHandler(MENUSTATE newMenuState, InputStream fileStream)
+    {
+        switch(newMenuState)
+        {
+            case SINGLEPLAYER:
+                menuState = MENUSTATE.SINGLEPLAYER;
+
+                this.removeMouseListener(currentMenu);
+                this.removeMouseMotionListener(currentMenu);
+                this.removeKeyListener(game);
+
+                game = new Gameplay(fileStream);
+                game.addListener(this);
+
+                this.addKeyListener(game);
+
+                this.setFocusable(true);
+                this.requestFocusInWindow();
+                this.setFocusTraversalKeysEnabled(false);
+
+                repaint();
+
+                currentMenu = null;
+                break;
+        }
+    }
+
+    @Override
+    public void mpSwitchHandler(MENUSTATE newMenuState, WallBreakerConnection wbConnection, boolean isServer)
+    {
+        switch (newMenuState)
+        {
+            case MULTIPLAYERGAME:
+                {
                 menuState = MENUSTATE.MULTIPLAYERGAME;
 
                 this.removeMouseListener(currentMenu);

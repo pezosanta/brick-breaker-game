@@ -28,6 +28,7 @@ public class GameMap implements Serializable {
     Wall[] walls;
     Ball ball;
     Paddle paddle;
+    Paddle paddle2;
 
     final int[][] startingHealth;
 
@@ -66,6 +67,7 @@ public class GameMap implements Serializable {
         int[][] startingHealth_temp;
         this.ball = new Ball(otherMap.ball);
         this.paddle = new Paddle(otherMap.paddle);
+        this.paddle2 = new Paddle(otherMap.paddle2);
 
         // Deep copy bricks
         this.bricks = new Brick[otherMap.bricks.length][];
@@ -113,7 +115,10 @@ public class GameMap implements Serializable {
         ball.setSpeedY(-4);
 
         //the paddle
-        paddle = new Paddle(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
+        paddle = new Paddle(3*panelWidth/4 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
+        paddle2 = new Paddle(panelWidth/4 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
+        paddle.setColor(Color.BLUE);
+        paddle2.setColor(Color.GRAY);
     }
 
     public void createCheckpoint() {
@@ -162,6 +167,7 @@ public class GameMap implements Serializable {
             objects.addAll(Arrays.asList(brickRow));
         objects.add(ball);
         objects.add(paddle);
+        objects.add(paddle2);
         return objects;
     }
 
@@ -211,6 +217,7 @@ public class GameMap implements Serializable {
                 mapgen.bricks[i][j].setHealth(values.get(i*cols + j));
             }
         }
+
         return mapgen;
     }
 }

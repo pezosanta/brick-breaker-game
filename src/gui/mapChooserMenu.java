@@ -5,7 +5,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.InputStream;
+//import java.io.UnsupportedEncodingException;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class mapChooserMenu extends Menu implements ActionListener
@@ -65,6 +71,35 @@ public class mapChooserMenu extends Menu implements ActionListener
         }
 
         return textWidths;
+    }
+
+    public ArrayList<String> getAvailableMaps()
+    {
+        //ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+
+        ClassLoader classloader = this.getClass().getClassLoader();
+        String path = classloader.getResource("maps").getPath();
+
+        try
+        {
+            path = URLDecoder.decode(path, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+
+        File mapFiles = new File(path);
+        String[] mapFilesList = mapFiles.list();
+        /*
+        for(int i=0; i< mapFilesList.length; i++)
+        {
+            mapFilesList[i] = path + "/" + mapFilesList[i];
+        }
+
+         */
+
+        return new ArrayList<>(Arrays.asList(mapFilesList));
     }
 
     @Override
@@ -194,30 +229,38 @@ public class mapChooserMenu extends Menu implements ActionListener
         {
             if ((rectangleYArray[0] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[0])
             {
+                ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+                InputStream fileStream = classloader.getResourceAsStream(getAvailableMaps().get(0));
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.spSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER, fileStream);
                 }
             }
             else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])
             {
+                ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+                InputStream fileStream = classloader.getResourceAsStream(getAvailableMaps().get(1));
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.spSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER, fileStream);
                 }
             }
             else if ((rectangleYArray[2] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[2])
             {
+                ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+                InputStream fileStream = classloader.getResourceAsStream(getAvailableMaps().get(2));
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.spSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER, fileStream);
                 }
             }
             else if ((rectangleYArray[3] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[3])
             {
+                ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+                InputStream fileStream = classloader.getResourceAsStream(getAvailableMaps().get(3));
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.spSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER, fileStream);
                 }
             }
             else if ((rectangleYArray[4] + rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[4])

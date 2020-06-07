@@ -173,6 +173,9 @@ public class Gameplay implements KeyListener, ActionListener {
                         case PLAYER_RELEASED:
                             stopMove();
                             break;
+                        case PLAYER_RELEASED2:
+                            stopMove2();
+                            break;
                         case PLAYER_PRESSED:
                             isReady = true;
                             switch ((int) msg.keyCode) {
@@ -181,6 +184,12 @@ public class Gameplay implements KeyListener, ActionListener {
                                     break;
                                 case KeyEvent.VK_RIGHT:
                                     moveRight();
+                                    break;
+                                case KeyEvent.VK_A:
+                                    moveLeft2();
+                                    break;
+                                case KeyEvent.VK_D:
+                                    moveRight2();
                                     break;
                             }
                     }
@@ -206,6 +215,9 @@ public class Gameplay implements KeyListener, ActionListener {
                                 break;
                             case PLAYER_RELEASED:
                                 stopMove();
+                                break;
+                            case PLAYER_RELEASED2:
+                                stopMove2();
                                 break;
                             case PLAYER_READY:
                                 isClientReady = true;
@@ -284,6 +296,12 @@ public class Gameplay implements KeyListener, ActionListener {
                 }
             }
 
+            // TODO: ez kell?
+            if (!isMultiplayer && isEnded) {
+                // Process client messages
+                stop();
+            }
+
             // Draw game (calls this.render implicitly)
             listeners.forEach(menuListener -> menuListener.gamePaintHandler());
         }
@@ -309,17 +327,32 @@ public class Gameplay implements KeyListener, ActionListener {
         if (paddlepos.x > (map.panelWidth - map.paddle.getRect().width-map.wallWidth)) {
             stopMove();
             paddlepos.x = map.panelWidth - map.paddle.getRect().width-map.wallWidth;
-        } else if (paddlepos.x < map.wallWidth) {
+        } else if (paddlepos.x < map.panelWidth/2) {
             stopMove();
-            paddlepos.x = map.wallWidth;
+            paddlepos.x = map.panelWidth/2;
         }
         map.paddle.setPosition(paddlepos);
+
+        Point paddlepos2 = map.paddle2.getPosition();
+        paddlepos2.x += map.paddle2.getSpeedX();
+        if (paddlepos2.x > (map.panelWidth/2 - map.paddle2.getRect().width)) {
+            stopMove();
+            paddlepos2.x = map.panelWidth/2 - map.paddle2.getRect().width;
+        }
+        else if (paddlepos2.x < map.wallWidth) {
+            stopMove();
+            paddlepos2.x = map.wallWidth;
+        }
+        map.paddle2.setPosition(paddlepos2);
     }
 
     private boolean handleCollisions() {
         // Paddle
         if (map.ball.collidesWith(map.paddle)) {
             map.ball.handleCollisionWithPaddle(map.paddle);
+        }
+        else if (map.ball.collidesWith(map.paddle2)) {
+            map.ball.handleCollisionWithPaddle(map.paddle2);
         }
 
         // Walls
@@ -365,6 +398,10 @@ public class Gameplay implements KeyListener, ActionListener {
             case KeyEvent.VK_LEFT:
                 myEvents.add(new WBMessage(PLAYER_RELEASED, e.getKeyCode()));
                 break;
+            case KeyEvent.VK_A:
+            case KeyEvent.VK_D:
+                myEvents.add(new WBMessage(PLAYER_RELEASED2, e.getKeyCode()));
+                break;
             default:
                 break;
         }
@@ -376,6 +413,12 @@ public class Gameplay implements KeyListener, ActionListener {
             myEvents.add(new WBMessage(PLAYER_PRESSED, e.getKeyCode()));
         }
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            myEvents.add(new WBMessage(PLAYER_PRESSED, e.getKeyCode()));
+        }
+        if (e.getKeyCode() == KeyEvent.VK_A) {
+            myEvents.add(new WBMessage(PLAYER_PRESSED, e.getKeyCode()));
+        }
+        if (e.getKeyCode() == KeyEvent.VK_D) {
             myEvents.add(new WBMessage(PLAYER_PRESSED, e.getKeyCode()));
         }
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -411,6 +454,10 @@ public class Gameplay implements KeyListener, ActionListener {
         map.paddle.setSpeedX(0);
     }
 
+    public void stopMove2(){
+        map.paddle2.setSpeedX(0);
+    }
+
     public void moveRight(){
         if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
             map.paddle.setSpeedX(paddleSpeed);
@@ -420,6 +467,18 @@ public class Gameplay implements KeyListener, ActionListener {
     public void moveLeft(){
         if (map.paddle.getPosition().x > (map.wallWidth)) {
             map.paddle.setSpeedX(-paddleSpeed);
+        }
+    }
+
+    public void moveRight2(){
+        if (map.paddle2.getPosition().x < (map.panelWidth - map.paddle2.getRect().width - map.wallWidth)) {
+            map.paddle2.setSpeedX(paddleSpeed);
+        }
+    }
+
+    public void moveLeft2(){
+        if (map.paddle2.getPosition().x > (map.wallWidth)) {
+            map.paddle2.setSpeedX(-paddleSpeed);
         }
     }
 
@@ -449,8 +508,11 @@ public class Gameplay implements KeyListener, ActionListener {
             case SmallRacket: {
                 if(paddleSizeCounter > -maxPowerUpLevel) {
                     Rectangle rect = map.paddle.getRect();
+                    Rectangle rect2 = map.paddle2.getRect();
                     rect.width /= 2;
+                    rect2.width /= 2;
                     map.paddle.setRect(rect.x, rect.y, rect.width, rect.height);
+                    map.paddle2.setRect(rect2.x, rect2.y, rect2.width, rect2.height);
                     paddleSizeCounter--;
                 }
                 break;
@@ -458,8 +520,11 @@ public class Gameplay implements KeyListener, ActionListener {
             case BigRacket: {
                 if(paddleSizeCounter < maxPowerUpLevel) {
                     Rectangle rect = map.paddle.getRect();
+                    Rectangle rect2 = map.paddle2.getRect();
                     rect.width *= 2;
+                    rect2.width *= 2;
                     map.paddle.setRect(rect.x, rect.y, rect.width, rect.height);
+                    map.paddle2.setRect(rect2.x, rect2.y, rect2.width, rect2.height);
                     paddleSizeCounter++;
                 }
                 break;

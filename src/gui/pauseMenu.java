@@ -55,7 +55,7 @@ public class pauseMenu extends Menu
         g.setFont(fnt1);
         g.setColor(super.fontColor);
         g.drawString("Resume", resumeButton.x + 90, resumeButton.y + 35);
-        g.drawString("Back to Main", backButton.x + 56, backButton.y + 35);
+        g.drawString("Back", backButton.x + 112, backButton.y + 35);
 
         clickedState = Menu.CLICKEDSTATE.OTHER;
     }
@@ -122,7 +122,7 @@ public class pauseMenu extends Menu
             {
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN);
+                    hl.menuSwitchHandler(menuHandler.MENUSTATE.MAPCHOOSER);
                 }
             }
         }
