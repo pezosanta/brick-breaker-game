@@ -104,7 +104,6 @@ public class Gameplay implements KeyListener, ActionListener {
             }
         }
 
-        System.out.println("Multiplayer Gameplay initialized as: " + this.isServer);
         timer.start();
     }
 
@@ -191,7 +190,6 @@ public class Gameplay implements KeyListener, ActionListener {
                 if (isMultiplayer && !isEnded) {
                     // Process client messages
                     while (wbProtocol.isDataAvailable()) {
-                        System.out.println("Client message received!");
                         lastReadMessage = wbProtocol.readMessage();
                         if (lastReadMessage == null) lastReadMessage = new WBMessage(EXITED, null);
                         switch (lastReadMessage.msg) {
@@ -238,12 +236,8 @@ public class Gameplay implements KeyListener, ActionListener {
 
                     // Send updated game map to client
                     if (isMultiplayer) {
-                        GameMap testMap = new GameMap(map);
-                        //testMap.ball.setPosition(new Point(123, 456));
-                        lastSentMessage = new WBMessage(MAP, testMap);
+                        lastSentMessage = new WBMessage(MAP, new GameMap(map));
                         wbProtocol.sendMessage(lastSentMessage);
-                        System.out.println("sent msg id = " + lastSentMessage.id);
-                        System.out.println("sent ballpos = " + lastSentMessage.map.ball.getPosition());
                         if (isEnded) { // This was the last step we took
                             lastSentMessage = new WBMessage(GAME_FINISHED, null);
                             wbProtocol.sendMessage(lastSentMessage);
@@ -265,8 +259,6 @@ public class Gameplay implements KeyListener, ActionListener {
                                 throw new RuntimeException("Received GameMap is null!");
                             }
                             map = lastReadMessage.map;
-                            System.out.println("CLIENT: Map received! ID is: " + lastReadMessage.id);
-                            System.out.println("received ballpos = " + lastReadMessage.map.ball.getPosition());
                             break;
                         case GAME_STARTED:
                             isStarted = true;
@@ -287,7 +279,6 @@ public class Gameplay implements KeyListener, ActionListener {
 
                 // Send player control input to server
                 while (!myEvents.isEmpty()) {
-                    System.out.println("Client event sent!");
                     lastSentMessage = myEvents.poll();
                     wbProtocol.sendMessage(lastSentMessage);
                 }
