@@ -5,6 +5,7 @@ import networking.WallBreakerConnection;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -234,8 +235,9 @@ public class menuHandler extends JPanel implements MenuListener
 
                 this.addKeyListener(game);
 
-                this.addMouseListener(currentMenu);
-                this.addMouseMotionListener(currentMenu);
+                this.setFocusable(true);
+                this.requestFocusInWindow();
+                this.setFocusTraversalKeysEnabled(false);
 
                 repaint();
                 currentMenu = null;

@@ -15,9 +15,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static networking.WBMessage.MsgType.*;
 
@@ -38,10 +38,10 @@ public class Gameplay implements KeyListener, ActionListener {
     private int maxPowerUpLevel = 3;
 
     private Timer timer;
-    private int delay = 16;
+    private int delay = 160;
 
     private GameMap map;
-    private Queue<WBMessage> myEvents = new LinkedList<>();
+    private Queue<WBMessage> myEvents = new ConcurrentLinkedQueue<>();
 
     private Random random = new Random();
 
@@ -182,6 +182,7 @@ public class Gameplay implements KeyListener, ActionListener {
             if (isMultiplayer && !isEnded) {
                 // Process client messages
                 while (wbProtocol.isDataAvailable()) {
+                    System.out.println("Client message received!");
                     WBMessage msg = wbProtocol.readMessage();
                     if (msg == null) msg = new WBMessage(EXITED, null);
                     switch (msg.msg) {
@@ -232,11 +233,15 @@ public class Gameplay implements KeyListener, ActionListener {
                         // TODO: show message that connection was lost
                         System.out.println("Server has exited the game.");
                         listeners.forEach(hl -> hl.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));
+                        return;
                 }
             }
 
             // Send player control input to server
-            while (!myEvents.isEmpty()) wbProtocol.sendMessage(myEvents.poll());
+            while (!myEvents.isEmpty()) {
+                System.out.println("Client event sent!");
+                wbProtocol.sendMessage(myEvents.poll());
+            }
         }
 
         // Draw game (calls this.render implicitly)
