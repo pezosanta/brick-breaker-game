@@ -20,5 +20,6 @@ public class WBMessage implements Serializable {
         GAME_FINISHED,
         PLAYER_PRESSED,
         PLAYER_RELEASED,
+        PLAYER_RELEASED2,
     }
 }

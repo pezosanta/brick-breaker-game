@@ -26,6 +26,7 @@ public class GameMap implements Serializable {
     Wall[] walls;
     Ball ball;
     Paddle paddle;
+    Paddle paddle2;
 
     final int[][] startingHealth;
 
@@ -93,7 +94,9 @@ public class GameMap implements Serializable {
 
         //the paddle
         paddle = new Paddle(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
+        paddle2 = new Paddle(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
         paddle.setColor(Color.BLUE);
+        paddle2.setColor(Color.GRAY);
     }
 
     public void createCheckpoint() {
@@ -142,6 +145,7 @@ public class GameMap implements Serializable {
             objects.addAll(Arrays.asList(brickRow));
         objects.add(ball);
         objects.add(paddle);
+        objects.add(paddle2);
         return objects;
     }
 
