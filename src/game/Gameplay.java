@@ -171,25 +171,16 @@ public class Gameplay implements KeyListener, ActionListener {
                     WBMessage msg = myEvents.poll();
                     switch (msg.msg) {
                         case PLAYER_RELEASED:
-                            stopMove();
-                            break;
-                        case PLAYER_RELEASED2:
-                            stopMove2();
+                            stopMove(1);
                             break;
                         case PLAYER_PRESSED:
                             isReady = true;
                             switch ((int) msg.keyCode) {
                                 case KeyEvent.VK_LEFT:
-                                    moveLeft();
+                                    moveLeft(1);
                                     break;
                                 case KeyEvent.VK_RIGHT:
-                                    moveRight();
-                                    break;
-                                case KeyEvent.VK_A:
-                                    moveLeft2();
-                                    break;
-                                case KeyEvent.VK_D:
-                                    moveRight2();
+                                    moveRight(1);
                                     break;
                             }
                     }
@@ -206,18 +197,15 @@ public class Gameplay implements KeyListener, ActionListener {
                                 isClientReady = true;
                                 switch ((int) lastReadMessage.keyCode) {
                                     case KeyEvent.VK_LEFT:
-                                        moveLeft();
+                                        moveLeft(2);
                                         break;
                                     case KeyEvent.VK_RIGHT:
-                                        moveRight();
+                                        moveRight(2);
                                         break;
                                 }
                                 break;
                             case PLAYER_RELEASED:
-                                stopMove();
-                                break;
-                            case PLAYER_RELEASED2:
-                                stopMove2();
+                                stopMove(2);
                                 break;
                             case PLAYER_READY:
                                 isClientReady = true;
@@ -325,10 +313,10 @@ public class Gameplay implements KeyListener, ActionListener {
         Point paddlepos = map.paddle.getPosition();
         paddlepos.x += map.paddle.getSpeedX();
         if (paddlepos.x > (map.panelWidth - map.paddle.getRect().width-map.wallWidth)) {
-            stopMove();
+            stopMove(1);
             paddlepos.x = map.panelWidth - map.paddle.getRect().width-map.wallWidth;
         } else if (paddlepos.x < map.panelWidth/2) {
-            stopMove();
+            stopMove(1);
             paddlepos.x = map.panelWidth/2;
         }
         map.paddle.setPosition(paddlepos);
@@ -336,11 +324,11 @@ public class Gameplay implements KeyListener, ActionListener {
         Point paddlepos2 = map.paddle2.getPosition();
         paddlepos2.x += map.paddle2.getSpeedX();
         if (paddlepos2.x > (map.panelWidth/2 - map.paddle2.getRect().width)) {
-            stopMove();
+            stopMove(2);
             paddlepos2.x = map.panelWidth/2 - map.paddle2.getRect().width;
         }
         else if (paddlepos2.x < map.wallWidth) {
-            stopMove();
+            stopMove(2);
             paddlepos2.x = map.wallWidth;
         }
         map.paddle2.setPosition(paddlepos2);
@@ -398,10 +386,6 @@ public class Gameplay implements KeyListener, ActionListener {
             case KeyEvent.VK_LEFT:
                 myEvents.add(new WBMessage(PLAYER_RELEASED, e.getKeyCode()));
                 break;
-            case KeyEvent.VK_A:
-            case KeyEvent.VK_D:
-                myEvents.add(new WBMessage(PLAYER_RELEASED2, e.getKeyCode()));
-                break;
             default:
                 break;
         }
@@ -450,35 +434,44 @@ public class Gameplay implements KeyListener, ActionListener {
         }
     }
 
-    public void stopMove(){
-        map.paddle.setSpeedX(0);
-    }
-
-    public void stopMove2(){
-        map.paddle2.setSpeedX(0);
-    }
-
-    public void moveRight(){
-        if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
-            map.paddle.setSpeedX(paddleSpeed);
+    public void stopMove(int paddleIdx) {
+        switch (paddleIdx) {
+            case 1:
+                map.paddle.setSpeedX(0);
+                break;
+            case 2:
+                map.paddle2.setSpeedX(0);
+                break;
         }
     }
 
-    public void moveLeft(){
-        if (map.paddle.getPosition().x > (map.wallWidth)) {
-            map.paddle.setSpeedX(-paddleSpeed);
+    public void moveRight(int paddleIdx) {
+        switch (paddleIdx) {
+            case 1:
+                if (map.paddle.getPosition().x < (map.panelWidth - map.paddle.getRect().width - map.wallWidth)) {
+                    map.paddle.setSpeedX(paddleSpeed);
+                }
+                break;
+            case 2:
+                if (map.paddle2.getPosition().x < (map.panelWidth - map.paddle2.getRect().width - map.wallWidth)) {
+                    map.paddle2.setSpeedX(paddleSpeed);
+                }
+                break;
         }
     }
 
-    public void moveRight2(){
-        if (map.paddle2.getPosition().x < (map.panelWidth - map.paddle2.getRect().width - map.wallWidth)) {
-            map.paddle2.setSpeedX(paddleSpeed);
-        }
-    }
-
-    public void moveLeft2(){
-        if (map.paddle2.getPosition().x > (map.wallWidth)) {
-            map.paddle2.setSpeedX(-paddleSpeed);
+    public void moveLeft(int paddleIdx) {
+        switch (paddleIdx) {
+            case 1:
+                if (map.paddle.getPosition().x > (map.wallWidth)) {
+                    map.paddle.setSpeedX(-paddleSpeed);
+                }
+                break;
+            case 2:
+                if (map.paddle2.getPosition().x > (map.wallWidth)) {
+                    map.paddle2.setSpeedX(-paddleSpeed);
+                }
+                break;
         }
     }
 
