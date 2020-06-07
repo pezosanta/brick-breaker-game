@@ -1,9 +1,6 @@
 package gui;
 
-import java.awt.Rectangle;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
@@ -36,9 +33,12 @@ public class mainMenu extends Menu
         g2d.setColor(super.inactiveColor);
         g2d.fill(singlePlayerButton);
         g2d.fill(multiplayerButton);
-        g2d.fill(highScoreButton);
+        //g2d.fill(highScoreButton);
         g2d.fill(aboutButton);
         g2d.fill(quitButton);
+
+        g2d.setColor(Color.GRAY);
+        g2d.fill(highScoreButton);
 
         switch(buttonState)
         {
@@ -55,13 +55,14 @@ public class mainMenu extends Menu
 
                 g2d.fill(multiplayerButton);
                 break;
-
+            /*
             case HIGHSCORE:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
                 else { g2d.setColor(super.activeColor); }
 
                 g2d.fill(highScoreButton);
                 break;
+             */
 
             case ABOUT:
                 if (clickedState == CLICKEDSTATE.CLICKED) { g2d.setColor(super.clickedColor); }
@@ -81,7 +82,7 @@ public class mainMenu extends Menu
                 g2d.setColor(super.inactiveColor);
                 g2d.fill(singlePlayerButton);
                 g2d.fill(multiplayerButton);
-                g2d.fill(highScoreButton);
+                //g2d.fill(highScoreButton);
                 g2d.fill(aboutButton);
                 g2d.fill(quitButton);
         }
