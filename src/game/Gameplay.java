@@ -79,6 +79,7 @@ public class Gameplay implements KeyListener, ActionListener {
 
         if (isServer) {
             map = new GameMap();
+            map.addSecondPaddle();
             lastSentMessage = new WBMessage(MAP, map);
             boolean success = wbProtocol.sendMessage(lastSentMessage);
             if (!success) throw new RuntimeException("Failed to send map!");
@@ -284,12 +285,6 @@ public class Gameplay implements KeyListener, ActionListener {
                 }
             }
 
-            // TODO: ez kell?
-            if (!isMultiplayer && isEnded) {
-                // Process client messages
-                stop();
-            }
-
             // Draw game (calls this.render implicitly)
             listeners.forEach(menuListener -> menuListener.gamePaintHandler());
         }
@@ -312,26 +307,30 @@ public class Gameplay implements KeyListener, ActionListener {
 
         Point paddlepos = map.paddle.getPosition();
         paddlepos.x += map.paddle.getSpeedX();
-        if (paddlepos.x > (map.panelWidth - map.paddle.getRect().width-map.wallWidth)) {
+        if (paddlepos.x > (map.panelWidth - map.paddle.getRect().width-map.wallWidth)) { // Right wall check
             stopMove(1);
             paddlepos.x = map.panelWidth - map.paddle.getRect().width-map.wallWidth;
-        } else if (paddlepos.x < map.panelWidth/2) {
+        } else if (!isMultiplayer && paddlepos.x < map.wallWidth) { // Left wall check
             stopMove(1);
-            paddlepos.x = map.panelWidth/2;
+            paddlepos.x = map.wallWidth;
+        } else if (isMultiplayer && paddlepos.x < map.panelWidth / 2) { // Middle point check (MP)
+            stopMove(1);
+            paddlepos.x = map.panelWidth / 2;
         }
         map.paddle.setPosition(paddlepos);
 
-        Point paddlepos2 = map.paddle2.getPosition();
-        paddlepos2.x += map.paddle2.getSpeedX();
-        if (paddlepos2.x > (map.panelWidth/2 - map.paddle2.getRect().width)) {
-            stopMove(2);
-            paddlepos2.x = map.panelWidth/2 - map.paddle2.getRect().width;
+        if (isMultiplayer) {
+            Point paddlepos2 = map.paddle2.getPosition();
+            paddlepos2.x += map.paddle2.getSpeedX();
+            if (paddlepos2.x > (map.panelWidth / 2 - map.paddle2.getRect().width)) {
+                stopMove(2);
+                paddlepos2.x = map.panelWidth / 2 - map.paddle2.getRect().width;
+            } else if (paddlepos2.x < map.wallWidth) {
+                stopMove(2);
+                paddlepos2.x = map.wallWidth;
+            }
+            map.paddle2.setPosition(paddlepos2);
         }
-        else if (paddlepos2.x < map.wallWidth) {
-            stopMove(2);
-            paddlepos2.x = map.wallWidth;
-        }
-        map.paddle2.setPosition(paddlepos2);
     }
 
     private boolean handleCollisions() {
