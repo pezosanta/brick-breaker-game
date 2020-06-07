@@ -50,7 +50,7 @@ public class clientModeMenu extends Menu implements ActionListener
     private void createJTextField()
     {
         Font ipFont = new Font(super.fontStyle, Font.BOLD, super.fontSize);
-        ipTextField = new JTextField("Enter server IP address.");
+        ipTextField = new JTextField("Server IP");
         ipTextField.setBounds(super.xTitle,150,392,50); //592
         ipTextField.setFont(ipFont);
     }
