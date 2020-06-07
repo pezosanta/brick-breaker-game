@@ -34,7 +34,6 @@ public class GameMap implements Serializable {
 
     public GameMap() {
         this((int[][]) null);
-        System.out.println("No-arg constructor called of GameMap.");
     }
 
     public GameMap(int[][] healths) {
@@ -43,7 +42,7 @@ public class GameMap implements Serializable {
             // Create array of ones
             healths = new int[ROWS][COLS];
 
-            for (int i = 0 ; i < ROWS; i++){
+            for (int i = 0 ; i < ROWS; i++) {
                 for (int j = 0; j < COLS; j++){
                     float strength = r.nextFloat();
                     if (strength < 0.5){
@@ -114,10 +113,14 @@ public class GameMap implements Serializable {
         ball.setSpeedX(-3);
         ball.setSpeedY(-4);
 
-        //the paddle
+        //the paddles
         paddle = new Paddle(3*panelWidth/4 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
-        paddle2 = new Paddle(panelWidth/4 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
         paddle.setColor(Color.BLUE);
+        paddle2 = new Paddle(0,0,0,0);
+    }
+
+    public void addSecondPaddle() {
+        paddle2 = new Paddle(panelWidth/4 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
         paddle2.setColor(Color.GRAY);
     }
 
@@ -211,13 +214,13 @@ public class GameMap implements Serializable {
             return new GameMap();
         }
 
-        GameMap mapgen = new GameMap();
-        for (int i=0; i<mapgen.bricks.length; i++) {
-            for (int j=0; j< mapgen.bricks[i].length; j++) {
-                mapgen.bricks[i][j].setHealth(values.get(i*cols + j));
+        int[][] healths = new int[ROWS][COLS];
+        for (int i=0; i<healths.length; i++) {
+            for (int j=0; j< healths[i].length; j++) {
+                healths[i][j] = values.get(i*cols + j);
             }
         }
 
-        return mapgen;
+        return new GameMap(healths);
     }
 }

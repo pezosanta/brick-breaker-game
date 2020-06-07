@@ -29,10 +29,6 @@ public class WBMessage implements Serializable {
         this(msg, null, keyCode);
     }
 
-    public WBMessage() {
-        throw new RuntimeException("Ezt nagyon nem akarjuk...");
-    }
-
     public enum MsgType {
         NONE,
         OK,
@@ -43,6 +39,6 @@ public class WBMessage implements Serializable {
         PLAYER_PRESSED,
         PLAYER_RELEASED,
         GAME_STARTED,
-        PLAYER_RELEASED2,
+        NEW_SCORE,
     }
 }
