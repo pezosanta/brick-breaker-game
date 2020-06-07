@@ -6,7 +6,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.InputStream;
+//import java.io.UnsupportedEncodingException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,10 +75,19 @@ public class mapChooserMenu extends Menu implements ActionListener
 
     public ArrayList<String> getAvailableMaps()
     {
-        //ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        //URL mapsPath = classloader.getResource("C:/maps");
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        String path = classloader.getResource("maps").getPath();
 
-        File folderPath = new File("C:/Users/Tony Stark/Desktop/Beágyazott rendszerek szoftvertechnológiája/BrickBreaker/JAVA/brickBreakerGame/out/production/brickBreakerGame/maps");
+        try
+        {
+            path = URLDecoder.decode(path, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+
+        File folderPath = new File(path);
         String[] mapPaths = folderPath.list();
 
         return new ArrayList<>(Arrays.asList(mapPaths));
