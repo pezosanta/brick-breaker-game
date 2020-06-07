@@ -68,7 +68,7 @@ public class WallBreakerProtocol {
         WallBreakerConnection wbclient = new WallBreakerConnection(false);
         InetAddress hostAddress = wbhost.getAddress();
 
-        Consumer<Boolean> connectionListener = new Consumer<Boolean>() {
+        /*Consumer<Boolean> connectionListener = new Consumer<Boolean>() {
             @Override
             public void accept(Boolean success) {
                 System.out.println("Connection at host side was successful: " + success);
@@ -134,6 +134,6 @@ public class WallBreakerProtocol {
             tclient.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

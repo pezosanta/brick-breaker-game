@@ -70,13 +70,13 @@ public class Gameplay implements KeyListener, ActionListener {
 
     public Gameplay(boolean isServer, InputStream inStream, OutputStream outStream) {
         this.isServer = isServer;
-        map = new GameMap();
         timer = new Timer(delay,this);
         isMultiplayer = true;
 
         wbProtocol = new WallBreakerProtocol(inStream, outStream);
 
         if (isServer) {
+            map = new GameMap();
             boolean success = wbProtocol.sendMessage(new WBMessage(MAP, map));
             if (!success) throw new RuntimeException("Failed to send map!");
 
@@ -87,11 +87,12 @@ public class Gameplay implements KeyListener, ActionListener {
             }
 
         } else {
+            map = null;
             WBMessage msg = wbProtocol.readMessage();
             if (msg == null || msg.msg != MAP) throw new RuntimeException("Bad initial message!");
 
-            if (msg.payload != null) {
-                map = (GameMap) msg.payload;
+            if (msg.map != null) {
+                map = msg.map;
                 boolean success = wbProtocol.sendMessage(new WBMessage(OK, null));
                 if (!success) throw new RuntimeException("Failed to send OK message!");
             } else {
@@ -116,7 +117,7 @@ public class Gameplay implements KeyListener, ActionListener {
         timer.stop();
         if (!isMultiplayer) {
             map.createCheckpoint();
-        } else if (wbProtocol != null && isLoopExecuting == false) {
+        } else if (wbProtocol != null) {
             wbProtocol.sendMessage(new WBMessage(EXITED, null));
             wbProtocol.close();
             wbProtocol = null;
@@ -170,7 +171,7 @@ public class Gameplay implements KeyListener, ActionListener {
                             break;
                         case PLAYER_PRESSED:
                             isReady = true;
-                            switch ((int) msg.payload) {
+                            switch ((int) msg.keyCode) {
                                 case KeyEvent.VK_LEFT:
                                     moveLeft();
                                     break;
@@ -191,8 +192,17 @@ public class Gameplay implements KeyListener, ActionListener {
                         switch (msg.msg) {
                             case PLAYER_PRESSED:
                                 isClientReady = true;
+                                switch ((int) msg.keyCode) {
+                                    case KeyEvent.VK_LEFT:
+                                        moveLeft();
+                                        break;
+                                    case KeyEvent.VK_RIGHT:
+                                        moveRight();
+                                        break;
+                                }
                                 break;
                             case PLAYER_RELEASED:
+                                stopMove();
                                 break;
                             case PLAYER_READY:
                                 isClientReady = true;
@@ -207,7 +217,7 @@ public class Gameplay implements KeyListener, ActionListener {
                 }
 
                 // If players are ready: start game!
-                if (isReady) {
+                if (isReady && !isStarted) {
                     if (!isMultiplayer) {
                         isStarted = true;
                     } else if (isMultiplayer && isClientReady) {
@@ -222,10 +232,10 @@ public class Gameplay implements KeyListener, ActionListener {
 
                     // Send updated game map to client
                     if (isMultiplayer) {
-                        WBMessage msg = new WBMessage(MAP, this.map);
+                        WBMessage msg = new WBMessage(MAP, map);
                         wbProtocol.sendMessage(msg);
                         System.out.println("sent msg id = " + msg.id);
-                        System.out.println("sent ballpos = " + ((GameMap)msg.payload).ball.getPosition());
+                        System.out.println("sent ballpos = " + ((GameMap)msg.map).ball.getPosition());
                         if (isEnded) { // This was the last step we took
                             wbProtocol.sendMessage(new WBMessage(GAME_FINISHED, null));
                         }
@@ -241,19 +251,19 @@ public class Gameplay implements KeyListener, ActionListener {
                     if (msg == null) msg = new WBMessage(EXITED, null);
                     switch (msg.msg) {
                         case MAP:
-                            if (msg.payload == null) {
+                            if (msg.map == null) {
                                 stop();
                                 throw new RuntimeException("Received GameMap is null!");
                             }
-                            map = (GameMap) msg.payload;
+                            map = msg.map;
                             System.out.println("CLIENT: Map received! ID is: " + msg.id);
-                            System.out.println("received ballpos = " + map.ball.getPosition());
+                            System.out.println("received ballpos = " + msg.map.ball.getPosition());
                             break;
                         case GAME_STARTED:
                             isStarted = true;
                             break;
                         case GAME_FINISHED:
-                            stop();
+                            timer.stop();
                             isEnded = true;
                             break;
                         default:

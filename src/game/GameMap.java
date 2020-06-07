@@ -10,6 +10,8 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class GameMap implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public static final int ROWS = 4;
     public static final int COLS = 8;
 

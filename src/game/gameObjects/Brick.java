@@ -1,8 +1,11 @@
 package game.gameObjects;
 
 import java.awt.*;
+import java.io.Serializable;
 
-public class Brick extends RectGameObject {
+public class Brick extends RectGameObject implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public static final Color[] DEFAULT_COLOR_LIST = {Color.BLACK, Color.GREEN, Color.BLUE, Color.RED, Color.ORANGE, Color.GRAY};
     public static final int MAX_ALLOWED_HEALTH = 5;
 

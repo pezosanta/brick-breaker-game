@@ -1,8 +1,11 @@
 package game.gameObjects;
 
 import java.awt.*;
+import java.io.Serializable;
 
-public class Wall extends RectGameObject {
+public class Wall extends RectGameObject implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public static final Color DEFAULT_COLOR = Color.WHITE;
 
     public Wall(int x, int y, int width, int height) {

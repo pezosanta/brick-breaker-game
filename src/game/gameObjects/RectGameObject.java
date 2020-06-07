@@ -1,8 +1,11 @@
 package game.gameObjects;
 
 import java.awt.*;
+import java.io.Serializable;
 
-public class RectGameObject extends GameObject {
+public class RectGameObject extends GameObject implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public Rectangle getRect() {
         return rect;
     }

@@ -1,8 +1,11 @@
 package game.gameObjects;
 
 import java.awt.*;
+import java.io.Serializable;
 
-public class Paddle extends RectGameObject {
+public class Paddle extends RectGameObject implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public static final Color DEFAULT_COLOR = Color.BLUE;
     private int speedX;
 
