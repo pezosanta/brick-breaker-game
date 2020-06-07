@@ -6,6 +6,8 @@ import java.io.Serializable;
 public class RectGameObject extends GameObject implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    protected Rectangle rect;
+
     public Rectangle getRect() {
         return rect;
     }
@@ -21,10 +23,13 @@ public class RectGameObject extends GameObject implements Serializable {
         this.rect = new Rectangle(this.position, new Dimension(width, height));
     }
 
-    protected Rectangle rect;
-
     public RectGameObject(int x, int y, int width, int height) {
         setRect(x, y, width, height);
+    }
+
+    public RectGameObject(RectGameObject otherRect) {
+        super(otherRect);
+        this.rect = new Rectangle(otherRect.getRect());
     }
 
     @Override

@@ -46,6 +46,12 @@ public class Brick extends RectGameObject implements Serializable {
         setColor(DEFAULT_COLOR_LIST[health]);
     }
 
+    public Brick(Brick otherBrick) {
+        super(otherBrick);
+        this.health = otherBrick.health;
+        this.maxHealth = otherBrick.maxHealth;
+    }
+
     @Override
     public void draw(Graphics2D g) {
         if (health > 0)

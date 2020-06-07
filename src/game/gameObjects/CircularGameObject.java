@@ -18,6 +18,11 @@ public class CircularGameObject extends GameObject implements Serializable {
         this.radius = radius;
     }
 
+    public CircularGameObject(CircularGameObject otherCircle) {
+        super(otherCircle);
+        this.radius = otherCircle.radius;
+    }
+
     public CircularGameObject(int x, int y, int radius) {
         setPosition(new Point(x, y));
         setRadius(radius);

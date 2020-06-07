@@ -38,6 +38,12 @@ public class Ball extends CircularGameObject implements Serializable {
         setColor(DEFAULT_COLOR);
     }
 
+    public Ball(Ball otherBall) {
+        super(otherBall);
+        this.speedX = otherBall.speedX;
+        this.speedY = otherBall.speedY;
+    }
+
     public void handleCollisionWith(RectGameObject rectObj) {
         if (!this.collidesWith(rectObj)) {
             throw new IllegalArgumentException("Given argument does not collide with me pls!");

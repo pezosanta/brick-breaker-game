@@ -6,8 +6,15 @@ import java.io.Serializable;
 public abstract class GameObject implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    protected Point position;
+    protected Point position = new Point(0, 0);
     protected Color color = Color.GRAY;
+
+    public GameObject() {}
+
+    public GameObject(GameObject otherObj) {
+        this.position = new Point(otherObj.position);
+        this.color = otherObj.getColor();
+    }
 
     public Point getPosition() {
         return position;

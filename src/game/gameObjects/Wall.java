@@ -17,4 +17,8 @@ public class Wall extends RectGameObject implements Serializable {
         super(x, y, width, height);
         this.color = color;
     }
+
+    public Wall(Wall otherWall) {
+        super(otherWall);
+    }
 }

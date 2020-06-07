@@ -5,11 +5,13 @@ import game.GameMap;
 import java.io.Serializable;
 
 public class WBMessage implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static int NEXTID = 1;
-    public final int id;
-    public final MsgType msg;
-    public final GameMap map;
-    public final int keyCode;
+    public int id;
+    public MsgType msg;
+    public GameMap map;
+    public int keyCode;
 
     public WBMessage(MsgType msg, GameMap map, int keyCode) {
         this.id = NEXTID;
@@ -25,6 +27,10 @@ public class WBMessage implements Serializable {
 
     public WBMessage(MsgType msg, int keyCode) {
         this(msg, null, keyCode);
+    }
+
+    public WBMessage() {
+        throw new RuntimeException("Ezt nagyon nem akarjuk...");
     }
 
     public enum MsgType {

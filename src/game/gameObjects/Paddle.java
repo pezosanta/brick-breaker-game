@@ -26,4 +26,9 @@ public class Paddle extends RectGameObject implements Serializable {
         setSpeedX(speedX);
         setColor(DEFAULT_COLOR);
     }
+
+    public Paddle(Paddle otherPaddle) {
+        super(otherPaddle);
+        this.speedX = otherPaddle.speedX;
+    }
 }

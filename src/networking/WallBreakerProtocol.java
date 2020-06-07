@@ -25,7 +25,7 @@ public class WallBreakerProtocol {
 
     public boolean sendMessage(WBMessage msg) {
         try {
-            outputStream.writeObject(msg);
+            outputStream.writeUnshared(msg);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -35,7 +35,7 @@ public class WallBreakerProtocol {
 
     public WBMessage readMessage() {
         try {
-            return (WBMessage) inputStream.readObject();
+            return (WBMessage) inputStream.readUnshared();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

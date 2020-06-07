@@ -31,6 +31,8 @@ public class Gameplay implements KeyListener, ActionListener {
     private boolean isServer = true;
     private boolean isClientReady = false;
     private WallBreakerProtocol wbProtocol;
+    private WBMessage lastReadMessage;
+    private WBMessage lastSentMessage;
 
     private int score = 0;
     private int paddleSpeed = 8;
@@ -77,23 +79,25 @@ public class Gameplay implements KeyListener, ActionListener {
 
         if (isServer) {
             map = new GameMap();
-            boolean success = wbProtocol.sendMessage(new WBMessage(MAP, map));
+            lastSentMessage = new WBMessage(MAP, map);
+            boolean success = wbProtocol.sendMessage(lastSentMessage);
             if (!success) throw new RuntimeException("Failed to send map!");
 
-            WBMessage msg = wbProtocol.readMessage();
-            if (msg == null || msg.msg != OK) {
-                System.out.println(msg.toString());
+            lastReadMessage = wbProtocol.readMessage();
+            if (lastReadMessage == null || lastReadMessage.msg != OK) {
+                System.out.println(lastReadMessage.toString());
                 throw new RuntimeException("Client failed to respond properly!");
             }
 
         } else {
             map = null;
-            WBMessage msg = wbProtocol.readMessage();
-            if (msg == null || msg.msg != MAP) throw new RuntimeException("Bad initial message!");
+            lastReadMessage = wbProtocol.readMessage();
+            if (lastReadMessage == null || lastReadMessage.msg != MAP) throw new RuntimeException("Bad initial message!");
 
-            if (msg.map != null) {
-                map = msg.map;
-                boolean success = wbProtocol.sendMessage(new WBMessage(OK, null));
+            if (lastReadMessage.map != null) {
+                map = lastReadMessage.map;
+                lastSentMessage = new WBMessage(OK, null);
+                boolean success = wbProtocol.sendMessage(lastSentMessage);
                 if (!success) throw new RuntimeException("Failed to send OK message!");
             } else {
                 throw new RuntimeException("Could not receive GameMap object from server! Aborting...");
@@ -118,7 +122,8 @@ public class Gameplay implements KeyListener, ActionListener {
         if (!isMultiplayer) {
             map.createCheckpoint();
         } else if (wbProtocol != null) {
-            wbProtocol.sendMessage(new WBMessage(EXITED, null));
+            lastSentMessage = new WBMessage(EXITED, null);
+            wbProtocol.sendMessage(lastSentMessage);
             wbProtocol.close();
             wbProtocol = null;
         }
@@ -187,12 +192,12 @@ public class Gameplay implements KeyListener, ActionListener {
                     // Process client messages
                     while (wbProtocol.isDataAvailable()) {
                         System.out.println("Client message received!");
-                        WBMessage msg = wbProtocol.readMessage();
-                        if (msg == null) msg = new WBMessage(EXITED, null);
-                        switch (msg.msg) {
+                        lastReadMessage = wbProtocol.readMessage();
+                        if (lastReadMessage == null) lastReadMessage = new WBMessage(EXITED, null);
+                        switch (lastReadMessage.msg) {
                             case PLAYER_PRESSED:
                                 isClientReady = true;
-                                switch ((int) msg.keyCode) {
+                                switch ((int) lastReadMessage.keyCode) {
                                     case KeyEvent.VK_LEFT:
                                         moveLeft();
                                         break;
@@ -222,7 +227,8 @@ public class Gameplay implements KeyListener, ActionListener {
                         isStarted = true;
                     } else if (isMultiplayer && isClientReady) {
                         isStarted = true;
-                        wbProtocol.sendMessage(new WBMessage(GAME_STARTED, null));
+                        lastSentMessage = new WBMessage(GAME_STARTED, null);
+                        wbProtocol.sendMessage(lastSentMessage);
                     }
                 }
 
@@ -232,12 +238,15 @@ public class Gameplay implements KeyListener, ActionListener {
 
                     // Send updated game map to client
                     if (isMultiplayer) {
-                        WBMessage msg = new WBMessage(MAP, map);
-                        wbProtocol.sendMessage(msg);
-                        System.out.println("sent msg id = " + msg.id);
-                        System.out.println("sent ballpos = " + ((GameMap)msg.map).ball.getPosition());
+                        GameMap testMap = new GameMap(map);
+                        //testMap.ball.setPosition(new Point(123, 456));
+                        lastSentMessage = new WBMessage(MAP, testMap);
+                        wbProtocol.sendMessage(lastSentMessage);
+                        System.out.println("sent msg id = " + lastSentMessage.id);
+                        System.out.println("sent ballpos = " + lastSentMessage.map.ball.getPosition());
                         if (isEnded) { // This was the last step we took
-                            wbProtocol.sendMessage(new WBMessage(GAME_FINISHED, null));
+                            lastSentMessage = new WBMessage(GAME_FINISHED, null);
+                            wbProtocol.sendMessage(lastSentMessage);
                         }
                     }
                 }
@@ -247,17 +256,17 @@ public class Gameplay implements KeyListener, ActionListener {
             if (isMultiplayer && !isServer && !isEnded) {
                 // Process server messages
                 while (wbProtocol.isDataAvailable()) {
-                    WBMessage msg = wbProtocol.readMessage();
-                    if (msg == null) msg = new WBMessage(EXITED, null);
-                    switch (msg.msg) {
+                    lastReadMessage = wbProtocol.readMessage();
+                    if (lastReadMessage == null) lastReadMessage = new WBMessage(EXITED, null);
+                    switch (lastReadMessage.msg) {
                         case MAP:
-                            if (msg.map == null) {
+                            if (lastReadMessage.map == null) {
                                 stop();
                                 throw new RuntimeException("Received GameMap is null!");
                             }
-                            map = msg.map;
-                            System.out.println("CLIENT: Map received! ID is: " + msg.id);
-                            System.out.println("received ballpos = " + msg.map.ball.getPosition());
+                            map = lastReadMessage.map;
+                            System.out.println("CLIENT: Map received! ID is: " + lastReadMessage.id);
+                            System.out.println("received ballpos = " + lastReadMessage.map.ball.getPosition());
                             break;
                         case GAME_STARTED:
                             isStarted = true;
@@ -279,7 +288,8 @@ public class Gameplay implements KeyListener, ActionListener {
                 // Send player control input to server
                 while (!myEvents.isEmpty()) {
                     System.out.println("Client event sent!");
-                    wbProtocol.sendMessage(myEvents.poll());
+                    lastSentMessage = myEvents.poll();
+                    wbProtocol.sendMessage(lastSentMessage);
                 }
             }
 

@@ -32,7 +32,8 @@ public class GameMap implements Serializable {
     final int[][] startingHealth;
 
     public GameMap() {
-        this(null);
+        this((int[][]) null);
+        System.out.println("No-arg constructor called of GameMap.");
     }
 
     public GameMap(int[][] healths) {
@@ -59,6 +60,35 @@ public class GameMap implements Serializable {
         startingHealth = healths;
 
         this.reset();
+    }
+
+    public GameMap(GameMap otherMap) {
+        int[][] startingHealth_temp;
+        this.ball = new Ball(otherMap.ball);
+        this.paddle = new Paddle(otherMap.paddle);
+
+        // Deep copy bricks
+        this.bricks = new Brick[otherMap.bricks.length][];
+        for (int i=0; i<otherMap.bricks.length; i++) {
+            this.bricks[i] = new Brick[otherMap.bricks[i].length];
+            for (int j=0; j<otherMap.bricks[i].length; j++) {
+                this.bricks[i][j] = new Brick(otherMap.bricks[i][j]);
+            }
+        }
+
+        // Deep copy walls
+        this.walls = new Wall[otherMap.walls.length];
+        for (int i=0; i<otherMap.walls.length; i++) {
+            this.walls[i] = new Wall(otherMap.walls[i]);
+        }
+
+        // Deep copy startingHealth ints
+        startingHealth_temp = new int[otherMap.startingHealth.length][];
+        for (int i=0; i<otherMap.startingHealth.length; i++) {
+            startingHealth_temp[i] = new int[otherMap.startingHealth[i].length];
+            startingHealth_temp[i] = Arrays.copyOf(otherMap.startingHealth[i], otherMap.startingHealth[i].length);
+        }
+        this.startingHealth = startingHealth_temp;
     }
 
     public void reset() {
