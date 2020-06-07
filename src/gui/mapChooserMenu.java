@@ -70,12 +70,15 @@ public class mapChooserMenu extends Menu implements ActionListener
         return textWidths;
     }
 
-    public ArrayList<String> getAvailableMaps() {
+    public ArrayList<String> getAvailableMaps()
+    {
+        //ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        //URL mapsPath = classloader.getResource("C:/maps");
 
-        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        URL mapsPath = classloader.getResource("maps");
+        File folderPath = new File("C:/Users/Tony Stark/Desktop/Beágyazott rendszerek szoftvertechnológiája/BrickBreaker/JAVA/brickBreakerGame/out/production/brickBreakerGame/maps");
+        String[] mapPaths = folderPath.list();
 
-        return new ArrayList<>(Arrays.asList(new File(mapsPath.getPath()).list()));
+        return new ArrayList<>(Arrays.asList(mapPaths));
     }
 
     @Override
@@ -205,8 +208,6 @@ public class mapChooserMenu extends Menu implements ActionListener
         {
             if ((rectangleYArray[0] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[0])
             {
-                String filePath = "./resources/maps/sparse.csv";
-                //System.out.println(getAvailableMaps());
                 ClassLoader classloader = Thread.currentThread().getContextClassLoader();
                 InputStream fileStream = classloader.getResourceAsStream(getAvailableMaps().get(0));
                 for (MenuListener hl : listeners)
@@ -216,23 +217,29 @@ public class mapChooserMenu extends Menu implements ActionListener
             }
             else if ((rectangleYArray[1] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[1])
             {
+                ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+                InputStream fileStream = classloader.getResourceAsStream(getAvailableMaps().get(1));
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.spSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER, fileStream);
                 }
             }
             else if ((rectangleYArray[2] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[2])
             {
+                ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+                InputStream fileStream = classloader.getResourceAsStream(getAvailableMaps().get(2));
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.spSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER, fileStream);
                 }
             }
             else if ((rectangleYArray[3] + super.rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[3])
             {
+                ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+                InputStream fileStream = classloader.getResourceAsStream(getAvailableMaps().get(3));
                 for (MenuListener hl : listeners)
                 {
-                    hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    hl.spSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER, fileStream);
                 }
             }
             else if ((rectangleYArray[4] + rectangleHeight) >= e.getY() && e.getY() >= rectangleYArray[4])
