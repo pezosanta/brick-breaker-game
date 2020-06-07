@@ -235,9 +235,11 @@ public class Gameplay implements KeyListener, ActionListener {
                 if (isStarted && !isEnded) {
                     step();
 
-                    // Send updated game map to client
+                    // Send updated game map and score to client
                     if (isMultiplayer) {
                         lastSentMessage = new WBMessage(MAP, new GameMap(map));
+                        wbProtocol.sendMessage(lastSentMessage);
+                        lastSentMessage = new WBMessage(NEW_SCORE, score);
                         wbProtocol.sendMessage(lastSentMessage);
                         if (isEnded) { // This was the last step we took
                             lastSentMessage = new WBMessage(GAME_FINISHED, null);
@@ -260,6 +262,9 @@ public class Gameplay implements KeyListener, ActionListener {
                                 throw new RuntimeException("Received GameMap is null!");
                             }
                             map = lastReadMessage.map;
+                            break;
+                        case NEW_SCORE:
+                            score = lastReadMessage.keyCode;
                             break;
                         case GAME_STARTED:
                             isStarted = true;
