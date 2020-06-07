@@ -269,17 +269,17 @@ public class Gameplay implements KeyListener, ActionListener {
         if (paddlepos.x > (map.panelWidth - map.paddle.getRect().width-map.wallWidth)) {
             stopMove();
             paddlepos.x = map.panelWidth - map.paddle.getRect().width-map.wallWidth;
-        } else if (paddlepos.x < map.wallWidth) {
+        } else if (paddlepos.x < map.panelWidth/2) {
             stopMove();
-            paddlepos.x = map.wallWidth;
+            paddlepos.x = map.panelWidth/2;
         }
         map.paddle.setPosition(paddlepos);
 
         Point paddlepos2 = map.paddle2.getPosition();
         paddlepos2.x += map.paddle2.getSpeedX();
-        if (paddlepos2.x > (map.panelWidth - map.paddle2.getRect().width-map.wallWidth)) {
+        if (paddlepos2.x > (map.panelWidth/2 - map.paddle2.getRect().width)) {
             stopMove();
-            paddlepos2.x = map.panelWidth - map.paddle2.getRect().width-map.wallWidth;
+            paddlepos2.x = map.panelWidth/2 - map.paddle2.getRect().width;
         }
         else if (paddlepos2.x < map.wallWidth) {
             stopMove();

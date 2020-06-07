@@ -93,8 +93,8 @@ public class GameMap implements Serializable {
         ball.setColor(Color.MAGENTA);
 
         //the paddle
-        paddle = new Paddle(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
-        paddle2 = new Paddle(panelWidth/2 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
+        paddle = new Paddle(3*panelWidth/4 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
+        paddle2 = new Paddle(panelWidth/4 - paddleWidth/2, panelHeight-2*paddleHeight, paddleWidth, paddleHeight);
         paddle.setColor(Color.BLUE);
         paddle2.setColor(Color.GRAY);
     }
