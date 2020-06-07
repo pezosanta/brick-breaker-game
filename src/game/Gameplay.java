@@ -240,6 +240,13 @@ public class Gameplay implements KeyListener, ActionListener {
             while (!myEvents.isEmpty()) wbProtocol.sendMessage(myEvents.poll());
         }
 
+        if (!isMultiplayer && isEnded) {
+            // Process client messages
+            stop();
+        }
+
+
+
         // Draw game (calls this.render implicitly)
         listeners.forEach(menuListener -> menuListener.gamePaintHandler());
     }
@@ -336,15 +343,27 @@ public class Gameplay implements KeyListener, ActionListener {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             if (isEnded) {
                 if (!isMultiplayer) {
-                    map.reset();
+                    //map.reset();
                     isReady = false;
                     isStarted = false;
                     isEnded = false;
                     score = 0;
 
+                    /*
                     for (MenuListener hl : listeners) {
                         hl.gamePaintHandler();
                     }
+                    System.out.println("PEDIG ITT VAGYOK");
+
+                     */
+
+                    for (MenuListener hl : listeners)
+                    {
+                        hl.menuSwitchHandler(menuHandler.MENUSTATE.SINGLEPLAYER);
+                    }
+
+
+
                 } else {
                     // If in multiplayer, game ended and enter pressed: switch to main menu
                     listeners.forEach(menuListener -> menuListener.menuSwitchHandler(menuHandler.MENUSTATE.MAIN));

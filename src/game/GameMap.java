@@ -179,6 +179,7 @@ public class GameMap implements Serializable {
                 mapgen.bricks[i][j].setHealth(values.get(i*cols + j));
             }
         }
+
         return mapgen;
     }
 }

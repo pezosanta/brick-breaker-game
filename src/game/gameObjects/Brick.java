@@ -4,9 +4,9 @@ import java.awt.*;
 
 public class Brick extends RectGameObject {
     public static final Color[] DEFAULT_COLOR_LIST = {Color.BLACK, Color.GREEN, Color.BLUE, Color.RED, Color.ORANGE, Color.GRAY};
-    public static final int MAX_ALLOWED_HEALTH = 5;
+    public static final int MAX_ALLOWED_HEALTH = 35;
 
-    private final int maxHealth;
+    private int maxHealth = 40;
     private int health;
 
     public int getMaxHealth() {
@@ -20,10 +20,11 @@ public class Brick extends RectGameObject {
     public void setHealth(int health) {
         if (health < 0) {
             throw new IllegalArgumentException("Health cannot be less than zero!");
-        } else if (health > maxHealth) {
+        } else if (health > MAX_ALLOWED_HEALTH) {
             throw new IllegalArgumentException("Health cannot be greater than maxHealth!");
         }
         this.health = health;
+        this.maxHealth = health;
         setColor(DEFAULT_COLOR_LIST[health]);
     }
 
